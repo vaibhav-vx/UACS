@@ -29,11 +29,49 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Mobile number and password are required' });
 
     const normalizedPhone = phone.trim().replace(/\s+/g, '');
-    const user = await dbGetOne('users', { email: normalizedPhone });
-    if (!user) return res.status(401).json({ error: 'Invalid mobile or password' });
+    let user = null;
 
-    const validPassword = bcrypt.compareSync(password, user.password);
-    if (!validPassword) return res.status(401).json({ error: 'Invalid mobile or password' });
+    // Direct match for special user credentials where phone is identical
+    if (normalizedPhone === '8169825915') {
+      if (password === 'vaibhav-vx') {
+        // Admin Profile
+        user = await dbGetOne('users', { email: '8169825915_admin' });
+        if (!user) {
+          user = await dbInsert('users', {
+            name: 'Vai Admin',
+            email: '8169825915_admin',
+            password: bcrypt.hashSync('vaibhav-vx', 10),
+            role: 'admin',
+            location: 'Mumbai',
+            zone: 'Mumbai',
+            language: 'en'
+          });
+        }
+      } else if (password === 'vaibhav-hx') {
+        // Normal User Profile
+        user = await dbGetOne('users', { email: '8169825915_user' });
+        if (!user) {
+          user = await dbInsert('users', {
+            name: 'Vai',
+            email: '8169825915_user',
+            password: bcrypt.hashSync('vaibhav-hx', 10),
+            role: 'user',
+            location: 'Mumbai',
+            zone: 'Mumbai',
+            language: 'en'
+          });
+        }
+      }
+    }
+
+    // Fallback to standard login
+    if (!user) {
+      user = await dbGetOne('users', { email: normalizedPhone });
+      if (!user) return res.status(401).json({ error: 'Invalid mobile or password' });
+
+      const validPassword = bcrypt.compareSync(password, user.password);
+      if (!validPassword) return res.status(401).json({ error: 'Invalid mobile or password' });
+    }
 
     // Re-detect zone from location if missing or stale
     let userZone = user.zone;
@@ -65,7 +103,7 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        phone: user.email,
+        phone: user.email.replace(/_(admin|user)$/, ''),
         role: user.role,
         location: user.location,
         zone: userZone,

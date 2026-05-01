@@ -53,6 +53,9 @@ CREATE TABLE IF NOT EXISTS users (
   created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE users DROP COLUMN IF EXISTS department;
+
 -- ── TABLE: recipients ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS recipients (
   id               SERIAL PRIMARY KEY,

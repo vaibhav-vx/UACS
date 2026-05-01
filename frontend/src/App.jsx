@@ -33,7 +33,7 @@ const NAV_ITEMS = [
   { path: '/survival',   labelKey: 'survivalGuide', icon: BookOpen,        roles: ['user'] },
   { path: '/history',    labelKey: 'history',    icon: ScrollText,      roles: ['user'] },
   { path: '/evacuation', labelKey: 'evacuation', icon: MapIcon,            roles: ['user'] },
-  { path: '/map',        labelKey: 'map',         icon: MapIcon,             roles: ['admin', 'user'] },
+  { path: '/map',        labelKey: 'map',         icon: MapIcon,             roles: ['user'] },
   { path: '/family',     labelKey: 'family',     icon: Users,           roles: ['user'] },
   { path: '/stats',      labelKey: 'statistics', icon: BookTemplate,    roles: ['user'] },
   { path: '/settings',   labelKey: 'settings',   icon: Globe,           roles: ['user'] },
@@ -365,7 +365,7 @@ function AppLayout() {
               <Route path="/admin/simulation" element={user?.role?.toLowerCase() === 'admin' ? <SimulationPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/sos-center" element={user?.role?.toLowerCase() === 'admin' ? <SOSResponsePage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/profile"      element={<ProfilePage />} />
-              <Route path="/map"          element={<MapPage />} />
+              <Route path="/map"          element={user?.role?.toLowerCase() === 'user' ? <MapPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="*"             element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </div>

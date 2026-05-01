@@ -442,11 +442,14 @@ p, span, h1, h2, h3, h4, h5, h6, div, td, th {
   z-index: 401 !important;
 }
 
-/* Resizable Map Card (Admin) */
+/* Resizable Map Card (Admin & User) */
 .map-card-resizable {
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  resize: vertical;
+  overflow: auto !important;
+  min-height: 250px;
+  max-height: 90vh;
 }
+
 
 .map-card-small { height: 300px; }
 .map-card-medium { height: 500px; }

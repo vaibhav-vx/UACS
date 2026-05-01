@@ -130,7 +130,7 @@ export default function SituationMapCard() {
   };
 
   return (
-    <div className={`glass-card overflow-hidden transition-all duration-500 map-card-resizable ${sizeClasses[mapSize]} relative shadow-2xl border-0`}>
+    <div className={`glass-card transition-all duration-500 map-card-resizable ${sizeClasses[mapSize]} relative shadow-2xl border-0`}>
 
 
       {/* Map Size Controls (Bottom Right) */}

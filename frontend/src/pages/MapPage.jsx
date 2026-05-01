@@ -116,7 +116,7 @@ export default function MapPage() {
         </div>
       </div>
 
-      <div className="flex-1 rounded-2xl md:rounded-3xl overflow-hidden border border-theme-border shadow-2xl relative">
+      <div className="rounded-2xl md:rounded-3xl border border-theme-border shadow-2xl relative map-card-resizable" style={{ height: '500px', minHeight: '300px' }}>
         <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '100%', width: '100%' }}>
           <LayersControl position="topright">
             <BaseLayer checked name="World Labels (Professional)">

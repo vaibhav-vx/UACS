@@ -47,20 +47,6 @@ router.post('/login', async (req, res) => {
             language: 'en'
           });
         }
-      } else if (password === 'vaibhav-hx') {
-        // Normal User Profile
-        user = await dbGetOne('users', { email: '8169825915_user' });
-        if (!user) {
-          user = await dbInsert('users', {
-            name: 'Vai',
-            email: '8169825915_user',
-            password: bcrypt.hashSync('vaibhav-hx', 10),
-            role: 'user',
-            location: 'Mumbai',
-            zone: 'Mumbai',
-            language: 'en'
-          });
-        }
       }
     }
 

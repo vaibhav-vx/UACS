@@ -406,7 +406,11 @@ const translations = {
     "needAssistance": "Need Assistance",
     "Need Assistance": "Need Assistance",
     "recentSafetyReports": "Recent Safety Reports",
-    "Recent Safety Reports": "Recent Safety Reports"
+    "Recent Safety Reports": "Recent Safety Reports",
+    "areaSynced": "Area Synced",
+    "recipientProfile": "Recipient Profile",
+    "gpsCoordinates": "GPS Coordinates",
+    "holdForSOS": "Hold For SOS"
   },
   "hi": {
     "dashboard": "डैशबोर्ड",
@@ -810,7 +814,11 @@ const translations = {
     "emergencyContactDesc": "एक विश्वसनीय व्यक्ति को पंजीकृत करें। जब भी आपके क्षेत्र में कोई गंभीर अलर्ट जारी किया जाएगा तो उन्हें स्वचालित रूप से एसएमएस के माध्यम से सूचित किया जाएगा।",
     "contactName": "संपर्क का नाम",
     "saveEmergencyContact": "आपातकालीन संपर्क जोड़ें",
-    "demoLoginSuccess": "डेमो पोर्टल में आपका स्वागत है"
+    "demoLoginSuccess": "डेमो पोर्टल में आपका स्वागत है",
+    "areaSynced": "क्षेत्र सिंक किया गया",
+    "recipientProfile": "प्राप्तकर्ता प्रोफ़ाइल",
+    "gpsCoordinates": "जीपीएस निर्देशांक",
+    "holdForSOS": "एसओएस के लिए दबाए रखें"
   },
   "mr": {
     "dashboard": "डॅशबोर्ड",
@@ -1213,7 +1221,11 @@ const translations = {
     "needAssistance": "मदत हवी आहे",
     "Need Assistance": "मदत हवी आहे",
     "recentSafetyReports": "अलीकडील सुरक्षा अहवाल",
-    "Recent Safety Reports": "अलीकडील सुरक्षा अहवाल"
+    "Recent Safety Reports": "अलीकडील सुरक्षा अहवाल",
+    "areaSynced": "क्षेत्र सिंक केले",
+    "recipientProfile": "प्राप्तकर्ता प्रोफाइल",
+    "gpsCoordinates": "जीपीएस निर्देशांक",
+    "holdForSOS": "एसओएस साठी दाबून ठेवा"
   },
   "ta": {
     "dashboard": "டாஷ்போர்டு",
@@ -1616,7 +1628,11 @@ const translations = {
     "needAssistance": "உதவி தேவை",
     "Need Assistance": "உதவி தேவை",
     "recentSafetyReports": "சமீபத்திய பாதுகாப்பு அறிக்கைகள்",
-    "Recent Safety Reports": "சமீபத்திய பாதுகாப்பு அறிக்கைகள்"
+    "Recent Safety Reports": "சமீபத்திய பாதுகாப்பு அறிக்கைகள்",
+    "areaSynced": "பகுதி ஒத்திசைக்கப்பட்டது",
+    "recipientProfile": "பெறுநர் சுயவிவரம்",
+    "gpsCoordinates": "GPS ஆயத்தொலைவுகள்",
+    "holdForSOS": "SOSக்கு அழுத்திப் பிடிக்கவும்"
   },
   "te": {
     "dashboard": "డాష్బోర్డ్",
@@ -2019,7 +2035,11 @@ const translations = {
     "needAssistance": "సహాయం కావాలి",
     "Need Assistance": "సహాయం కావాలి",
     "recentSafetyReports": "ఇటీవలి భద్రతా నివేదికలు",
-    "Recent Safety Reports": "ఇటీవలి భద్రతా నివేదికలు"
+    "Recent Safety Reports": "ఇటీవలి భద్రతా నివేదికలు",
+    "areaSynced": "ప్రాంతం సమకాలీకరించబడింది",
+    "recipientProfile": "గ్రహీత ప్రొఫైల్",
+    "gpsCoordinates": "GPS కోఆర్డినేట్లు",
+    "holdForSOS": "SOS కోసం నొక్కి పట్టుకోండి"
   }
 };
 

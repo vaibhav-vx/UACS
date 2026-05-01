@@ -169,24 +169,24 @@ const SOSResponsePage = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Status</div>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="bg-white/5 p-3 rounded-lg flex-1 min-w-[130px]">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1 whitespace-nowrap">Status</div>
                         <div className="text-sm font-medium text-white flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${report.assisted ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                          {report.assisted ? 'Help Dispatched' : 'Needs Help'}
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${report.assisted ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                          <span className="whitespace-nowrap">{report.assisted ? 'Help Dispatched' : 'Needs Help'}</span>
                         </div>
                       </div>
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Coordinates</div>
-                        <div className="text-sm font-medium text-white">
+                      <div className="bg-white/5 p-3 rounded-lg flex-1 min-w-[140px] overflow-hidden">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1 whitespace-nowrap">Coordinates</div>
+                        <div className="text-sm font-medium text-white truncate">
                           {report.lat ? `${report.lat}, ${report.lng}` : 'Not shared'}
                         </div>
                       </div>
-                      <div className="bg-white/5 p-3 rounded-lg col-span-2 md:col-span-1">
-                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Emergency Contact</div>
-                        <div className="text-sm font-medium text-emerald-400 flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3" /> Notified
+                      <div className="bg-white/5 p-3 rounded-lg flex-1 min-w-[150px]">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1 whitespace-nowrap">Emergency Contact</div>
+                        <div className="text-sm font-medium text-emerald-400 flex items-center gap-1 whitespace-nowrap">
+                          <CheckCircle className="w-3 h-3 flex-shrink-0" /> Notified
                         </div>
                       </div>
                     </div>

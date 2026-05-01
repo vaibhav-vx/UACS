@@ -280,23 +280,23 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-black tracking-tight">{user?.name} — {userCity}</h1>
                   <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase border border-green-500/20 flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" /> Area Synced
+                    <CheckCircle className="w-3 h-3" /> {t('areaSynced') || 'Area Synced'}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-theme-muted">
-                  <span className="flex items-center gap-1.5 text-accent"><MapIcon className="w-3.5 h-3.5" /> Recipient Registry Profile</span>
+                  <span className="flex items-center gap-1.5 text-accent"><MapIcon className="w-3.5 h-3.5" /> {t('recipientProfile') || 'Recipient Registry Profile'}</span>
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-4 bg-theme-surface/50 p-4 rounded-2xl border border-theme-border backdrop-blur-sm">
                <div className="space-y-1">
-                 <div className="text-[10px] uppercase font-black tracking-widest text-theme-muted">GPS Coordinates</div>
+                 <div className="text-[10px] uppercase font-black tracking-widest text-theme-muted">{t('gpsCoordinates') || 'GPS Coordinates'}</div>
                  <div className="font-mono text-sm font-bold text-theme-primary">{userCoords}</div>
                </div>
                <div className="h-8 w-px bg-theme-border mx-2"></div>
                <div className="space-y-1">
-                 <div className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Hold For SOS</div>
+                 <div className="text-[10px] uppercase font-black tracking-widest text-theme-muted">{t('holdForSOS') || 'Hold For SOS'}</div>
                  <button 
                    onMouseDown={() => {
                       setSosConfirming(true);

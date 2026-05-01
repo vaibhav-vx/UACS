@@ -86,7 +86,12 @@ router.post('/emergency', async (req, res) => {
     try {
       const recipientList = await dbSelect('recipients', { active: true }, { orderBy: 'created_at', ascending: false, limit: 5000 });
       const zoneFiltered = target_zone && target_zone !== 'All Zones' && target_zone.trim()
-        ? recipientList.filter(r => !r.zone || r.zone.toLowerCase() === target_zone.toLowerCase())
+        ? recipientList.filter(r => {
+            if (!r.zone) return true;
+            const targetZoneBase = target_zone.split('(')[0].trim().toLowerCase();
+            const recipZoneBase = r.zone.split('(')[0].trim().toLowerCase();
+            return recipZoneBase === targetZoneBase || targetZoneBase.includes(recipZoneBase) || recipZoneBase.includes(targetZoneBase);
+          })
         : recipientList;
       if (zoneFiltered.length > 0) {
         await sendBulkSMS(zoneFiltered, msgObj);

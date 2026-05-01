@@ -81,8 +81,14 @@ router.post('/:id', async (req, res) => {
 
             // Zone filter
             const zoneFiltered = msg.target_zone && msg.target_zone !== 'All Zones' && msg.target_zone.trim()
-              ? recipientList.filter(r => !r.zone || r.zone.toLowerCase() === msg.target_zone.toLowerCase())
+              ? recipientList.filter(r => {
+                  if (!r.zone) return true;
+                  const targetZoneBase = msg.target_zone.split('(')[0].trim().toLowerCase();
+                  const recipZoneBase = r.zone.split('(')[0].trim().toLowerCase();
+                  return recipZoneBase === targetZoneBase || targetZoneBase.includes(recipZoneBase) || recipZoneBase.includes(targetZoneBase);
+                })
               : recipientList;
+
 
             if (zoneFiltered.length === 0) {
               result = { success: true, channel: 'sms', message: '0 recipients — no SMS sent', sent: 0, failed: 0 };

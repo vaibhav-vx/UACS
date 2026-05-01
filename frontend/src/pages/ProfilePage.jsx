@@ -98,9 +98,10 @@ export default function ProfilePage() {
     if (user) {
       setName(user.name || '');
       setPhone(user.phone || user.email || '');
-      setDept(user.department || user.zone || '');
+      const rawDept = user.department || user.location || (user.zone && user.zone !== 'Field Ops' && user.zone !== 'General' ? user.zone : '');
+      setDept(rawDept);
       setRole(user.role || '');
-      setZone(user.zone || 'General');
+      setZone(rawDept || user.city || '');
       setLat(user.lat || null);
       setLng(user.lng || null);
       setLang(user.language || 'english');

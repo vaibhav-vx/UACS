@@ -297,11 +297,12 @@ router.get('/me', async (req, res) => {
 
     const { password: _, ...safe } = user;
 
+    const rawLoc = (user.department && user.department !== 'Field Ops' && user.department !== 'General') ? user.department : (user.location && user.location !== 'Field Ops' && user.location !== 'General') ? user.location : null;
     const profileData = {
       ...safe,
-      zone: currentZone,
-      city: currentCity,
-      location: user.department || user.location || null,
+      zone: rawLoc || (currentZone && currentZone !== 'Field Ops' && currentZone !== 'General' ? currentZone : 'Not Available'),
+      city: rawLoc || (currentCity && currentCity !== 'Field Ops' && currentCity !== 'General' ? currentCity : 'Not Available'),
+      location: rawLoc,
       language: safe.language || 'en',
       phone: safe.email, // Expose phone field from email column
     };

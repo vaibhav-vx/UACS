@@ -201,11 +201,11 @@ export default function DashboardPage() {
   if (loading) return (<div className="space-y-6"><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="glass-card p-5 h-24 shimmer rounded-xl"/>)}</div><div className="space-y-3">{[1,2,3].map(i=><div key={i} className="glass-card p-6 h-32 shimmer rounded-xl"/>)}</div></div>);
 
   if (!isAdmin) {
-    const userZone = user?.department || user?.location || user?.zone || 'General';
+    const getClean = (v) => v && v !== 'Field Ops' && v !== 'General' ? v : '';
+    const userZone = getClean(user?.department) || getClean(user?.location) || getClean(user?.zone) || 'General';
     const userPhone = user?.phone || user?.email || 'Not Provided';
     const userLang = user?.language || 'en';
-    const rawCity = user?.department || user?.location || user?.city || (user?.zone && user?.zone !== 'Field Ops' && user?.zone !== 'General' ? user.zone : '');
-    const userCity = rawCity || 'Not Provided';
+    const userCity = getClean(user?.department) || getClean(user?.location) || getClean(user?.city) || getClean(user?.zone) || 'Not Available';
     const userCoords = user?.lat && user?.lng ? `${Number(user.lat).toFixed(4)}, ${Number(user.lng).toFixed(4)}` : 'GPS Not Synced';
     
     // Improved logic for identifying myAlerts vs nearbyAlerts

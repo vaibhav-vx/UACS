@@ -27,6 +27,7 @@ import StatsPage      from './pages/StatsPage';
 import SettingsPage   from './pages/SettingsPage';
 import SurvivalGuidePage from './pages/SurvivalGuidePage';
 import SOSResponsePage from './pages/SOSResponsePage';
+import UserNotificationBar from './components/UserNotificationBar';
 
 const NAV_ITEMS = [
   { path: '/dashboard',  labelKey: 'dashboard',  icon: LayoutDashboard, roles: ['admin', 'user'] },
@@ -347,6 +348,7 @@ function AppLayout() {
             width: '100%',
             height: isSimulation ? '100vh' : 'auto'
           }}>
+            {user?.role?.toLowerCase() === 'user' && !isSimulation && <UserNotificationBar user={user} />}
             <Routes>
               <Route path="/dashboard"    element={<DashboardPage />} />
               <Route path="/survival"     element={<SurvivalGuidePage />} />

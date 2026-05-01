@@ -201,14 +201,14 @@ export default function DashboardPage() {
   if (loading) return (<div className="space-y-6"><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="glass-card p-5 h-24 shimmer rounded-xl"/>)}</div><div className="space-y-3">{[1,2,3].map(i=><div key={i} className="glass-card p-6 h-32 shimmer rounded-xl"/>)}</div></div>);
 
   if (!isAdmin) {
-    const userZone = user?.zone || user?.department || 'General';
+    const userZone = user?.department || user?.location || user?.zone || 'General';
     const userPhone = user?.phone || user?.email || 'Not Provided';
     const userLang = user?.language || 'en';
-    const userCity = user?.city || (userZone.match(/—\s*(.*)/) ? userZone.match(/—\s*(.*)/)[1] : userZone);
+    const userCity = user?.department || user?.location || user?.city || userZone;
     const userCoords = user?.lat && user?.lng ? `${Number(user.lat).toFixed(4)}, ${Number(user.lng).toFixed(4)}` : 'GPS Not Synced';
     
     // Improved logic for identifying myAlerts vs nearbyAlerts
-    const zoneNumberMatch = userZone.match(/Zone (\d+)/);
+    const zoneNumberMatch = null;
 
     const myAlerts = activeMessages.filter(msg => {
       if (!msg.target_zone || msg.target_zone === 'All Zones' || msg.target_zone === 'General') return true;
@@ -277,7 +277,7 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-black tracking-tight">{userCity} ({zoneNumberMatch ? `Zone ${zoneNumberMatch[1]}` : userZone})</h1>
+                  <h1 className="text-3xl font-black tracking-tight">{userCity}</h1>
                   <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase border border-green-500/20 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> Area Synced
                   </span>

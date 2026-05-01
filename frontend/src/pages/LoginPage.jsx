@@ -11,6 +11,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { detectZone } from '../utils/zoneMapper';
 import MapZonePicker from '../components/MapZonePicker';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 const REG_LANGUAGES = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -165,12 +166,12 @@ export default function LoginPage() {
   const { theme, toggleTheme }            = useTheme();
   const { t, language, setLanguage, LANGUAGES } = useLanguage();
   const curLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
+  const { user }                          = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('uacs_token');
-    if (token) { navigate('/dashboard'); return; }
+    if (user) { navigate('/dashboard'); return; }
     if (searchParams.get('expired') === '1') setLoginError(t('sessionExpired') || 'Your session has expired. Please log in again.');
-  }, [navigate, searchParams, t]);
+  }, [navigate, searchParams, t, user]);
 
   // Phone auto-formatter (XXXXX XXXXX) — only for registration
   const formatPhoneNumber = (value) => {

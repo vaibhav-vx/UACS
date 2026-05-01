@@ -166,7 +166,7 @@ export default function LoginPage() {
   const { theme, toggleTheme }            = useTheme();
   const { t, language, setLanguage, LANGUAGES } = useLanguage();
   const curLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
-  const { user }                          = useAuth();
+  const { user, setUser }                 = useAuth();
 
   useEffect(() => {
     if (user) { navigate('/dashboard'); return; }
@@ -205,6 +205,7 @@ export default function LoginPage() {
       const res = await authApi.login(loginPhone.trim(), loginPassword);
       localStorage.setItem('uacs_token', res.data.token);
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
+      setUser(res.data.user);
       navigate('/dashboard');
     } catch (err) {
       setLoginError(err.response?.data?.error || 'Invalid mobile or password');
@@ -236,6 +237,7 @@ export default function LoginPage() {
       toast.success(t('regSuccess') || 'Registration successful!');
       localStorage.setItem('uacs_token', res.data.token);
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
+      setUser(res.data.user);
       setRegSuccess(true);
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
@@ -253,6 +255,7 @@ export default function LoginPage() {
       const res = await authApi.demo();
       localStorage.setItem('uacs_token', res.data.token);
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
+      setUser(res.data.user);
       toast.success(t('demoLoginSuccess') || 'Welcome to Demo Portal');
       navigate('/dashboard');
     } catch (err) {

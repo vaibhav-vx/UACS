@@ -204,7 +204,8 @@ export default function DashboardPage() {
     const userZone = user?.department || user?.location || user?.zone || 'General';
     const userPhone = user?.phone || user?.email || 'Not Provided';
     const userLang = user?.language || 'en';
-    const userCity = user?.department || user?.location || user?.city || userZone;
+    const rawCity = user?.department || user?.location || user?.city || (user?.zone && user?.zone !== 'Field Ops' && user?.zone !== 'General' ? user.zone : '');
+    const userCity = rawCity || 'Not Provided';
     const userCoords = user?.lat && user?.lng ? `${Number(user.lat).toFixed(4)}, ${Number(user.lng).toFixed(4)}` : 'GPS Not Synced';
     
     // Improved logic for identifying myAlerts vs nearbyAlerts
@@ -277,7 +278,7 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-black tracking-tight">{userCity}</h1>
+                  <h1 className="text-3xl font-black tracking-tight">{user?.name} — {userCity}</h1>
                   <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase border border-green-500/20 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> Area Synced
                   </span>

@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
 
     // Auto-normalize phone: prepend +91 if missing country code
     const normalizedPhone = phone.startsWith('+') ? phone : `+91${phone.replace(/^0/, '')}`;
-    const detectedZone = detectZoneFromLocation(zone);
+    const detectedZone = zone || 'Not Provided';
 
     const newRecipient = await dbInsert('recipients', {
       name,
@@ -85,8 +85,8 @@ router.put('/:id', async (req, res) => {
     
     let detectedZone = existing.zone;
     if (zone !== undefined) {
-      detectedZone = detectZoneFromLocation(zone);
-      updates.zone = detectedZone;
+      detectedZone = zone;
+      updates.zone = zone;
     }
     
     if (language) updates.language = language;
@@ -96,26 +96,40 @@ router.put('/:id', async (req, res) => {
     const updated = await dbUpdate('recipients', id, updates);
 
     // Sync to Users table
-    const user = await dbGetOne('users', { email: existing.phone });
-    if (user) {
-      const userUpdates = {};
-      if (name) userUpdates.name = name.trim();
-      if (updates.phone) userUpdates.email = updates.phone;
-      if (zone !== undefined) {
-        userUpdates.department = detectedZone;
-        userUpdates.zone = detectedZone;
-      }
-      if (language) userUpdates.language = language;
-      if (lat !== undefined) userUpdates.lat = lat;
-      if (lng !== undefined) userUpdates.lng = lng;
-      
-      // If name changed, update password to match the new name-sx format (per user request)
-      if (name && name !== existing.name) {
-        const newPassword = `${name.trim().split(' ')[0]}-sx`;
-        userUpdates.password = bcrypt.hashSync(newPassword, 10);
-      }
+    let user = await dbGetOne('users', { email: existing.phone });
+    const userUpdates = {};
+    if (name) userUpdates.name = name.trim();
+    if (updates.phone) userUpdates.email = updates.phone;
+    if (zone !== undefined) {
+      userUpdates.department = detectedZone;
+      userUpdates.zone = detectedZone;
+    }
+    if (language) userUpdates.language = language;
+    if (lat !== undefined) userUpdates.lat = lat;
+    if (lng !== undefined) userUpdates.lng = lng;
 
+    if (name && name !== existing.name) {
+      const newPassword = `${name.trim().split(' ')[0]}-sx`;
+      userUpdates.password = bcrypt.hashSync(newPassword, 10);
+    }
+
+    if (user) {
       await dbUpdate('users', user.id, userUpdates);
+    } else {
+      const fallbackName = (name || existing.name).trim();
+      const newPassword = `${fallbackName.split(' ')[0]}-sx`;
+      const hash = bcrypt.hashSync(newPassword, 10);
+      await dbInsert('users', {
+        name: fallbackName,
+        email: updates.phone || existing.phone,
+        password: hash,
+        role: 'user',
+        department: detectedZone || existing.zone,
+        zone: detectedZone || existing.zone,
+        language: language || existing.language || 'english',
+        lat: lat !== undefined ? lat : existing.lat,
+        lng: lng !== undefined ? lng : existing.lng
+      });
     }
 
     res.json(updated);

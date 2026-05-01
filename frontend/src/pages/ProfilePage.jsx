@@ -122,9 +122,10 @@ export default function ProfilePage() {
     if (!name.trim()) { setProfMsg({ type: 'error', text: 'Name is required' }); return; }
     setProfSaving(true);
     try {
-      const res = await authApi.updateProfile({ name: name.trim(), department: dept.trim() });
+      const res = await authApi.updateProfile({ name: name.trim(), department: dept.trim(), zone: dept.trim(), lat, lng });
       const updated = res.data.user;
       localStorage.setItem('uacs_user', JSON.stringify({ ...JSON.parse(localStorage.getItem('uacs_user') || '{}'), ...updated }));
+      await fetchUser();
       setProfMsg({ type: 'success', text: 'Profile updated successfully' });
       toast.success('Profile saved');
     } catch (err) {

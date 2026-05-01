@@ -343,12 +343,18 @@ router.put('/profile', async (req, res) => {
     // Sync to Recipients table (by phone/email)
     if (updated && updated.email) {
        const existingRecipient = await dbGetOne('recipients', { phone: updated.email });
+       const recUpdates = { 
+         name: updated.name,
+         phone: updated.email,
+         zone: locationText || 'Not Provided',
+         lat: lat !== undefined ? lat : updated.lat,
+         lng: lng !== undefined ? lng : updated.lng,
+         active: true
+       };
        if (existingRecipient) {
-          const recUpdates = { name: updated.name };
-          if (locationText) recUpdates.zone = detected.fullZone;
-          if (lat !== undefined) recUpdates.lat = lat;
-          if (lng !== undefined) recUpdates.lng = lng;
           await dbUpdate('recipients', existingRecipient.id, recUpdates);
+       } else {
+          await dbInsert('recipients', recUpdates);
        }
     }
 

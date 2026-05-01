@@ -194,67 +194,98 @@ export default function SituationMapCard() {
         <MapEvents />
 
         {clickPos && (
-          <Marker position={clickPos} icon={L.divIcon({ html: '📍', className: 'text-2xl' })}>
-            <Popup minWidth={250}>
-              <div className="p-3 space-y-3">
-                <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase tracking-tighter">
-                  <AlertTriangle className="w-4 h-4" /> Rapid Alert Pin
+          <>
+            <Circle 
+              center={clickPos} 
+              radius={(Number(pinRadius) || 5) * 1000} 
+              pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.15, weight: 2, dashArray: '5, 5' }} 
+            />
+            <Marker position={clickPos} icon={L.divIcon({ html: '📍', className: 'text-2xl' })}>
+              <Popup minWidth={260}>
+                <div className="p-3 space-y-3">
+                  <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase tracking-tighter">
+                    <AlertTriangle className="w-4 h-4" /> Rapid Alert Pin
+                  </div>
+                  <input 
+                    autoFocus
+                    placeholder="Alert Title (e.g. Building Collapse)" 
+                    className="w-full bg-theme-hover p-2 rounded-lg text-xs font-bold border border-theme-border"
+                    value={pinTitle}
+                    onChange={e => setPinTitle(e.target.value)}
+                  />
+                  <textarea 
+                    placeholder="Short description / Instructions..." 
+                    className="w-full bg-theme-hover p-2 rounded-lg text-xs h-20 border border-theme-border"
+                    value={pinDesc}
+                    onChange={e => setPinDesc(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <input 
+                      placeholder="Location Name (e.g. Dharavi)" 
+                      className="flex-1 bg-theme-hover p-2 rounded-lg text-xs border border-theme-border"
+                      value={pinZone}
+                      onChange={e => setPinZone(e.target.value)}
+                    />
+                    <button 
+                      type="button"
+                      onClick={async () => {
+                        if (!pinZone.trim()) return;
+                        try {
+                          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pinZone)}`);
+                          const data = await res.json();
+                          if (data && data.length > 0) {
+                            const newPos = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                            setClickPos(newPos);
+                            toast.success(`Marker moved to ${pinZone}`);
+                          } else {
+                            toast.error("Location not found on map");
+                          }
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className="px-2 py-1 bg-theme-hover text-accent text-[10px] font-bold rounded-lg border border-theme-border flex items-center gap-1 hover:bg-accent hover:text-white transition-colors shrink-0"
+                    >
+                      📍 Move
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-theme-muted">
+                    Radius: <input type="number" min="1" max="50" value={pinRadius} onChange={e => setPinRadius(e.target.value)} className="w-16 bg-theme-hover p-1 rounded border border-theme-border text-center" /> km
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setPinUrgency('critical')}
+                      className={`flex-1 py-1 rounded-md text-[10px] font-bold ${pinUrgency === 'critical' ? 'bg-red-600 text-white' : 'bg-theme-hover text-theme-muted'}`}
+                    >
+                      CRITICAL
+                    </button>
+                    <button 
+                      onClick={() => setPinUrgency('high')}
+                      className={`flex-1 py-1 rounded-md text-[10px] font-bold ${pinUrgency === 'high' ? 'bg-orange-600 text-white' : 'bg-theme-hover text-theme-muted'}`}
+                    >
+                      HIGH
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setClickPos(null)}
+                      className="flex-1 py-2 bg-theme-hover rounded-xl text-[10px] font-bold"
+                    >
+                      CANCEL
+                    </button>
+                    <button 
+                      onClick={handlePinSubmit}
+                      disabled={submitting}
+                      className="flex-1 py-2 bg-accent text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-2 shadow-lg"
+                    >
+                      {submitting ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                      OK / DISPATCH
+                    </button>
+                  </div>
                 </div>
-                <input 
-                  autoFocus
-                  placeholder="Alert Title (e.g. Building Collapse)" 
-                  className="w-full bg-theme-hover p-2 rounded-lg text-xs font-bold border border-theme-border"
-                  value={pinTitle}
-                  onChange={e => setPinTitle(e.target.value)}
-                />
-                <textarea 
-                  placeholder="Short description / Instructions..." 
-                  className="w-full bg-theme-hover p-2 rounded-lg text-xs h-20 border border-theme-border"
-                  value={pinDesc}
-                  onChange={e => setPinDesc(e.target.value)}
-                />
-                <input 
-                  placeholder="Location Name (e.g. Dharavi)" 
-                  className="w-full bg-theme-hover p-2 rounded-lg text-xs border border-theme-border"
-                  value={pinZone}
-                  onChange={e => setPinZone(e.target.value)}
-                />
-                <div className="flex items-center gap-2 text-xs font-bold text-theme-muted">
-                  Radius: <input type="number" min="1" max="50" value={pinRadius} onChange={e => setPinRadius(e.target.value)} className="w-16 bg-theme-hover p-1 rounded border border-theme-border text-center" /> km
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => setPinUrgency('critical')}
-                    className={`flex-1 py-1 rounded-md text-[10px] font-bold ${pinUrgency === 'critical' ? 'bg-red-600 text-white' : 'bg-theme-hover text-theme-muted'}`}
-                  >
-                    CRITICAL
-                  </button>
-                  <button 
-                    onClick={() => setPinUrgency('high')}
-                    className={`flex-1 py-1 rounded-md text-[10px] font-bold ${pinUrgency === 'high' ? 'bg-orange-600 text-white' : 'bg-theme-hover text-theme-muted'}`}
-                  >
-                    HIGH
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => setClickPos(null)}
-                    className="flex-1 py-2 bg-theme-hover rounded-xl text-[10px] font-bold"
-                  >
-                    CANCEL
-                  </button>
-                  <button 
-                    onClick={handlePinSubmit}
-                    disabled={submitting}
-                    className="flex-1 py-2 bg-accent text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-2"
-                  >
-                    {submitting ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                    DISPATCH
-                  </button>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
+              </Popup>
+            </Marker>
+          </>
         )}
         
         {alerts.map(alert => {

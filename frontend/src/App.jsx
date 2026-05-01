@@ -36,7 +36,6 @@ const NAV_ITEMS = [
   { path: '/evacuation', labelKey: 'evacuation', icon: MapIcon,            roles: ['user'] },
   { path: '/map',        labelKey: 'map',         icon: MapIcon,             roles: ['user'] },
   { path: '/family',     labelKey: 'family',     icon: Users,           roles: ['user'] },
-  { path: '/stats',      labelKey: 'statistics', icon: BookTemplate,    roles: ['user'] },
   { path: '/settings',   labelKey: 'settings',   icon: Globe,           roles: ['user'] },
   
   // Admin Only
@@ -355,7 +354,6 @@ function AppLayout() {
               <Route path="/history"      element={<NotificationsPage />} />
               <Route path="/evacuation"   element={<EvacuationPage />} />
               <Route path="/family"       element={<FamilyPage />} />
-              <Route path="/stats"        element={<StatsPage />} />
               <Route path="/settings"     element={<SettingsPage />} />
               
               <Route path="/templates"    element={user?.role?.toLowerCase() === 'admin' ? <TemplatesPage /> : <Navigate to="/dashboard" replace />} />

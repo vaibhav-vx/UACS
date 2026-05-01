@@ -13,6 +13,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // all, critical, active, expired
+  const [expandedId, setExpandedId] = useState(null);
+
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -109,39 +111,87 @@ export default function NotificationsPage() {
                 <div className="h-px w-full bg-theme-border" />
               </div>
               <div className="space-y-4">
-                {items.map((alert) => (
-                  <div key={alert.id} className="glass-card overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all group">
-                    <div className="flex flex-col md:flex-row">
-                       <div className="w-1 bg-accent group-hover:w-2 transition-all shrink-0" style={{ backgroundColor: alert.urgency === 'critical' ? '#ef4444' : alert.urgency === 'high' ? '#f97316' : 'var(--accent)' }} />
-                       <div className="p-5 flex-1 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                          <div className="space-y-3">
-                             <div className="flex items-center gap-3">
-                                <AlertBanner urgency={alert.urgency} />
-                                <h3 className="font-bold text-lg">{alert.title}</h3>
-                             </div>
-                             <p className="text-sm text-theme-secondary line-clamp-1">{alert.master_content}</p>
-                             <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-theme-muted uppercase tracking-wider">
-                                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Received: {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Response: Marked Safe</span>
-                                <span className={`px-2 py-0.5 rounded ${alert.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-theme-hover text-theme-dim'}`}>
-                                   Status: {alert.status}
-                                </span>
-                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                             <button className="flex-1 md:flex-none px-4 py-2 rounded-xl bg-theme-hover border border-theme-border text-xs font-bold hover:border-accent transition-all flex items-center justify-center gap-2">
-                                <Eye className="w-3.5 h-3.5" /> Full Alert
-                             </button>
-                             {alert.status === 'active' && (
-                               <button className="flex-1 md:flex-none px-4 py-2 rounded-xl bg-accent text-white text-xs font-black shadow-lg shadow-accent/20 animate-pulse flex items-center justify-center gap-2">
-                                  Respond Now <ArrowRight className="w-3.5 h-3.5" />
-                               </button>
-                             )}
-                          </div>
-                       </div>
+                {items.map((alert) => {
+                  const isExpanded = expandedId === alert.id;
+                  return (
+                    <div key={alert.id} className="glass-card overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all group">
+                      <div className="flex flex-col md:flex-row">
+                         <div className="w-1 bg-accent group-hover:w-2 transition-all shrink-0" style={{ backgroundColor: alert.urgency === 'critical' ? '#ef4444' : alert.urgency === 'high' ? '#f97316' : 'var(--accent)' }} />
+                         <div className="p-5 flex-1 flex flex-col justify-between gap-6">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                              <div className="space-y-3">
+                                 <div className="flex items-center gap-3">
+                                    <AlertBanner urgency={alert.urgency} />
+                                    <h3 className="font-bold text-lg">{alert.title}</h3>
+                                 </div>
+                                 <p className={`text-sm text-theme-secondary ${isExpanded ? '' : 'line-clamp-1'}`}>{alert.master_content}</p>
+                                 <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-theme-muted uppercase tracking-wider">
+                                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Received: {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Response: Marked Safe</span>
+                                    <span className={`px-2 py-0.5 rounded ${alert.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-theme-hover text-theme-dim'}`}>
+                                       Status: {alert.status}
+                                    </span>
+                                 </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
+                                 <button 
+                                   onClick={() => setExpandedId(isExpanded ? null : alert.id)}
+                                   className={`flex-1 md:flex-none px-4 py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${isExpanded ? 'bg-accent text-white border-accent' : 'bg-theme-hover border-theme-border hover:border-accent'}`}
+                                 >
+                                    <Eye className="w-3.5 h-3.5" /> {isExpanded ? 'Close Alert' : 'Full Alert'}
+                                 </button>
+                                 {alert.status === 'active' && (
+                                   <button className="flex-1 md:flex-none px-4 py-2 rounded-xl bg-accent text-white text-xs font-black shadow-lg shadow-accent/20 animate-pulse flex items-center justify-center gap-2">
+                                      Respond Now <ArrowRight className="w-3.5 h-3.5" />
+                                   </button>
+                                 )}
+                              </div>
+                            </div>
+
+                            {/* Detailed Disaster Alert info */}
+                            {isExpanded && (
+                              <div className="mt-4 border-t border-white/5 pt-4 space-y-4 animate-fade-in">
+                                <div>
+                                  <span className="text-[10px] font-black uppercase text-theme-muted tracking-widest block mb-1">Target Zone / Scope</span>
+                                  <p className="text-sm font-semibold text-accent">{alert.target_zone || 'All India'}</p>
+                                </div>
+                                <div className="space-y-2">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Detailed Disaster Report</span>
+                                  <p className="text-sm text-slate-200 bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed font-medium whitespace-pre-wrap">
+                                    {alert.master_content}
+                                  </p>
+                                </div>
+
+                                {/* Regional Translations */}
+                                {alert.translations && typeof alert.translations === 'string' && (
+                                  <div className="space-y-1.5 pt-1 border-t border-white/5">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mt-2">Verified Regional Translations</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                                      {(() => {
+                                        try {
+                                          const parsed = JSON.parse(alert.translations);
+                                          return Object.entries(parsed).map(([lang, val]) => (
+                                            lang !== 'en' && val && (
+                                              <div key={lang} className="p-3 bg-accent/5 border border-accent/10 rounded-xl space-y-0.5">
+                                                <span className="text-[10px] font-black text-accent uppercase tracking-widest">{lang}</span>
+                                                <p className="text-xs text-slate-300 font-medium leading-relaxed">{val}</p>
+                                              </div>
+                                            )
+                                          ));
+                                        } catch {
+                                          return null;
+                                        }
+                                      })()}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                         </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

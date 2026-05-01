@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════
 // UACS Translation Integration
-// Uses Gemini API, Google, and MyMemory with fallbacks
+// Uses Google Translate and MyMemory API with fallback
 // ═══════════════════════════════════════
 
 import axios from 'axios';
@@ -18,30 +18,6 @@ const LANG_CODES = {
 const LANG_NAMES = {
   hi: 'Hindi', mr: 'Marathi', ta: 'Tamil', te: 'Telugu', en: 'English',
 };
-
-/**
- * Translate text using Gemini API via REST if a key is provided
- */
-async function translateViaGemini(text, targetLangName) {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!apiKey) throw new Error('No Gemini API key present in env');
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const payload = {
-    contents: [{
-      parts: [{
-        text: `Translate this text from English to ${targetLangName}. Respond only with the translated text, do not add any quotes or extra explanation:\n\n${text}`
-      }]
-    }]
-  };
-
-  const res = await axios.post(url, payload, { timeout: 15000 });
-  const translated = res.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-  if (translated) {
-    return translated;
-  }
-  throw new Error('Empty response from Gemini API');
-}
 
 /**
  * Translate text using MyMemory API (free, no key required up to 5000 words/day)
@@ -74,7 +50,7 @@ async function translateViaGoogle(text, sourceLang, targetLang) {
 }
 
 /**
- * Main translate function — tries Gemini API first (if enabled), falls back to Google, then MyMemory
+ * Main translate function — tries Google first, falls back to MyMemory
  */
 export async function translateText(text, source = 'en', target = 'hi') {
   if (!text?.trim() || target === source || target === 'en') return text;
@@ -83,19 +59,7 @@ export async function translateText(text, source = 'en', target = 'hi') {
   const tgtCode = LANG_CODES[target] || target;
   const tgtLangName = LANG_NAMES[tgtCode] || target;
 
-  // 1. Try Gemini API first if API key exists
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (apiKey) {
-    try {
-      const result = await translateViaGemini(text, tgtLangName);
-      console.log(`[UACS TRANSLATE] ✅ Gemini API: ${source} → ${target}`);
-      return result;
-    } catch (e) {
-      console.warn(`[UACS TRANSLATE] Gemini failed (${e.message}), falling back...`);
-    }
-  }
-
-  // 2. Try Google next (faster, more accurate)
+  // 1. Try Google Translate first
   try {
     const result = await translateViaGoogle(text, srcCode, tgtCode);
     console.log(`[UACS TRANSLATE] ✅ Google: ${source} → ${target}`);
@@ -104,7 +68,7 @@ export async function translateText(text, source = 'en', target = 'hi') {
     console.warn(`[UACS TRANSLATE] Google failed (${e.message}), trying MyMemory...`);
   }
 
-  // 3. Fall back to MyMemory
+  // 2. Fall back to MyMemory
   try {
     const result = await translateViaMyMemory(text, srcCode, tgtCode);
     console.log(`[UACS TRANSLATE] ✅ MyMemory: ${source} → ${target}`);

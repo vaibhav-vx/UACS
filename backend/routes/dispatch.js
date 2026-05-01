@@ -76,11 +76,47 @@ router.post('/:id', async (req, res) => {
         let result;
         switch (channel.toLowerCase()) {
           case 'sms': {
-            // Fetch all active recipients (Supabase uses true not 1)
-            const recipientList = await dbSelect('recipients', { active: true }, { orderBy: 'created_at', ascending: false, limit: 5000 });
+            // Fetch both users and recipients
+            const [recipientsList, usersList] = await Promise.all([
+              dbSelect('recipients', { active: true }, { orderBy: 'created_at', ascending: false, limit: 5000 }),
+              dbSelect('users', {}, { orderBy: 'created_at', ascending: false, limit: 5000 })
+            ]);
+
+            const combinedList = [];
+            const seenPhones = new Set();
+
+            recipientsList.forEach(r => {
+              if (r.phone) {
+                const cleanPhone = r.phone.replace(/\D/g, '');
+                if (cleanPhone.length >= 10 && !seenPhones.has(cleanPhone)) {
+                  seenPhones.add(cleanPhone);
+                  combinedList.push({
+                    name: r.name,
+                    phone: r.phone,
+                    zone: r.zone || 'General',
+                    language: r.language || 'en'
+                  });
+                }
+              }
+            });
+
+            usersList.forEach(u => {
+              if (u.email && u.role === 'user') {
+                const cleanPhone = u.email.replace(/\D/g, '');
+                if (cleanPhone.length >= 10 && !seenPhones.has(cleanPhone)) {
+                  seenPhones.add(cleanPhone);
+                  combinedList.push({
+                    name: u.name,
+                    phone: u.email,
+                    zone: u.zone || u.location || 'General',
+                    language: u.language || 'en'
+                  });
+                }
+              }
+            });
 
             // Zone filter
-            const zoneFiltered = recipientList.filter(r => {
+            const zoneFiltered = combinedList.filter(r => {
               if (!msg.target_zone || msg.target_zone.toLowerCase() === 'all' || msg.target_zone.toLowerCase() === 'all zones' || msg.target_zone.toLowerCase() === 'general' || msg.target_zone.toLowerCase() === 'all india') return true;
               if (!r.zone) return true;
 
@@ -95,7 +131,7 @@ router.post('/:id', async (req, res) => {
               const recipTokens = recipBase.split(/[\s,.-]+/).filter(w => w.length > 2);
 
               for (const t of targetTokens) {
-                if (recipTokens.includes(t)) return true;
+                if (recipTokens.includes(t) || recipBase.includes(t) || targetBase.includes(t)) return true;
               }
 
               return false;

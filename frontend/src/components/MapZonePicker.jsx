@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapIcon, X, Search, Check } from 'lucide-react';
 
-// Leaflet CSS must be imported here (once, globally in index.css is also fine)
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
 const PRESET_ZONES = [
   { name: 'North Delhi', lat: 28.7041, lng: 77.1025 },
@@ -26,7 +26,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
 
-  const updateMapIconOverlay = useCallback((lat, lng, km, L) => {
+  const updateMapIconOverlay = useCallback((lat, lng, km) => {
     if (!leafletMapIcon.current) return;
 
     // Remove old overlays
@@ -56,7 +56,6 @@ export default function MapZonePicker({ value, onChange, onClose }) {
   useEffect(() => {
     if (!mapRef.current || leafletMapIcon.current) return;
 
-    import('leaflet').then((L) => {
       // Fix default icon path issue with webpack/vite
       delete L.Icon.Default.prototype._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -80,7 +79,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
       leafletMapIcon.current.on('click', async (e) => {
         const { lat, lng } = e.latlng;
         setSelectedCoords({ lat, lng });
-        updateMapIconOverlay(lat, lng, radius, L);
+        updateMapIconOverlay(lat, lng, radius);
         
         // Reverse geocode to get zone name
         try {
@@ -94,7 +93,6 @@ export default function MapZonePicker({ value, onChange, onClose }) {
           console.error("Reverse geocode failed", err);
         }
       });
-    });
 
     return () => {
       if (leafletMapIcon.current) {

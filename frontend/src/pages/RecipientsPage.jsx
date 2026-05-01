@@ -322,7 +322,7 @@ export default function RecipientsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px,1fr))', gap: 12 }}>
         <Stat icon={Users}        label={t('totalRecipients') || "Total Recipients"} value={recipients.length} color="var(--accent)" />
         <Stat icon={CheckCircle2} label={t('active') || "Active"}           value={activeCount}       color="#22c55e" />
-        <Stat icon={Map}       label={t('zonesCovered') || "Zones Covered"}    value={zones.length}      color="#f97316" />
+        <Stat icon={MapIcon}       label={t('zonesCovered') || "Zones Covered"}    value={zones.length}      color="#f97316" />
         <Stat icon={Languages}    label={t('languages') || "Languages"}        value={[...new Set(recipients.map(r => r.language))].length} color="#a855f7" />
       </div>
 

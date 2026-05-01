@@ -230,7 +230,7 @@ export default function ProfilePage() {
             <input className="input-field" value={phone} disabled style={{ opacity: 0.6, cursor: 'not-allowed' }} />
             <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>{t('mobileNoChange') || 'Mobile number cannot be changed'}</p>
           </Field>
-          <Field label={t('locationZone') || 'Location / Zone'} icon={Map}>
+          <Field label={t('locationZone') || 'Location / Zone'} icon={MapIcon}>
             <input className="input-field" value={dept} onChange={e => setDept(e.target.value)} placeholder="e.g. Mumbai, Delhi, Pune" />
           </Field>
           {profMsg.text && <InlineAlert type={profMsg.type} msg={profMsg.text} />}
@@ -274,7 +274,7 @@ export default function ProfilePage() {
               <option value="telugu">Telugu</option>
             </select>
           </Field>
-          <Field label={t('alertZone') || 'Alert Zone'} icon={Map}>
+          <Field label={t('alertZone') || 'Alert Zone'} icon={MapIcon}>
             <div className="flex gap-2">
               <input 
                 type="text" 

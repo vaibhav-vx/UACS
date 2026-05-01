@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { useState, useEffect, useRef } from 'react';
 import {
   LayoutDashboard, PenSquare, CheckCircle2, ScrollText, LogOut,
-  Menu, X, Sun, Moon, Globe, ChevronDown, Users, BookTemplate, Map, Play,
+  Menu, X, Sun, Moon, Globe, ChevronDown, Users, BookTemplate, Map as MapIcon, Play,
   Zap,
   BookOpen
 } from 'lucide-react';
@@ -32,8 +32,8 @@ const NAV_ITEMS = [
   { path: '/dashboard',  labelKey: 'dashboard',  icon: LayoutDashboard, roles: ['admin', 'user'] },
   { path: '/survival',   labelKey: 'survivalGuide', icon: BookOpen,        roles: ['user'] },
   { path: '/history',    labelKey: 'history',    icon: ScrollText,      roles: ['user'] },
-  { path: '/evacuation', labelKey: 'evacuation', icon: Map,            roles: ['user'] },
-  { path: '/map',        labelKey: 'map',         icon: Map,             roles: ['admin', 'user'] },
+  { path: '/evacuation', labelKey: 'evacuation', icon: MapIcon,            roles: ['user'] },
+  { path: '/map',        labelKey: 'map',         icon: MapIcon,             roles: ['admin', 'user'] },
   { path: '/family',     labelKey: 'family',     icon: Users,           roles: ['user'] },
   { path: '/stats',      labelKey: 'statistics', icon: BookTemplate,    roles: ['user'] },
   { path: '/settings',   labelKey: 'settings',   icon: Globe,           roles: ['user'] },

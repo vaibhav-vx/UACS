@@ -98,7 +98,7 @@ export default function ProfilePage() {
     if (user) {
       setName(user.name || '');
       setPhone(user.phone || user.email || '');
-      const rawDept = user.department || user.location || (user.zone && user.zone !== 'Field Ops' && user.zone !== 'General' ? user.zone : '');
+      const rawDept = user.location || (user.zone && user.zone !== 'Field Ops' && user.zone !== 'General' ? user.zone : '');
       setDept(rawDept);
       setRole(user.role || '');
       setZone(rawDept || user.city || '');
@@ -122,7 +122,7 @@ export default function ProfilePage() {
     if (!name.trim()) { setProfMsg({ type: 'error', text: 'Name is required' }); return; }
     setProfSaving(true);
     try {
-      const res = await authApi.updateProfile({ name: name.trim(), department: dept.trim(), zone: dept.trim(), lat, lng });
+      const res = await authApi.updateProfile({ name: name.trim(), location: dept.trim(), zone: dept.trim(), lat, lng });
       const updated = res.data.user;
       localStorage.setItem('uacs_user', JSON.stringify({ ...JSON.parse(localStorage.getItem('uacs_user') || '{}'), ...updated }));
       await fetchUser();

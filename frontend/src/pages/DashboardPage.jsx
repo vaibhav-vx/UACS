@@ -85,7 +85,7 @@ export default function DashboardPage() {
         setSafetyStats(safStats.data);
         setRecentReports(safRecent.data);
       } else {
-        const userZone = user?.zone || user?.department || 'General';
+        const userZone = user?.zone || user?.location || 'General';
         const [rec, saf] = await Promise.all([
           recipientsApi.getAll(userZone),
           messagesApi.getSafetyStats()
@@ -202,10 +202,10 @@ export default function DashboardPage() {
 
   if (!isAdmin) {
     const getClean = (v) => v && v !== 'Field Ops' && v !== 'General' ? v : '';
-    const userZone = getClean(user?.department) || getClean(user?.location) || getClean(user?.zone) || 'General';
+    const userZone = getClean(user?.location) || getClean(user?.zone) || 'General';
     const userPhone = user?.phone || user?.email || 'Not Provided';
     const userLang = user?.language || 'en';
-    const userCity = getClean(user?.department) || getClean(user?.location) || getClean(user?.city) || getClean(user?.zone) || 'Not Available';
+    const userCity = getClean(user?.location) || getClean(user?.city) || getClean(user?.zone) || 'Not Available';
     const userCoords = user?.lat && user?.lng ? `${Number(user.lat).toFixed(4)}, ${Number(user.lng).toFixed(4)}` : 'GPS Not Synced';
     
     // Improved logic for identifying myAlerts vs nearbyAlerts

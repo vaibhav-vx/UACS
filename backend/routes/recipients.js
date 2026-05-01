@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
         email:      normalizedPhone, // phone stored in email column
         password:   hash,
         role:       'user',
-        department: detectedZone,
+        location:   detectedZone,
         zone:       detectedZone,
         language:   language || 'english',
         lat:        lat || null,
@@ -101,7 +101,7 @@ router.put('/:id', async (req, res) => {
     if (name) userUpdates.name = name.trim();
     if (updates.phone) userUpdates.email = updates.phone;
     if (zone !== undefined) {
-      userUpdates.department = detectedZone;
+      userUpdates.location = detectedZone;
       userUpdates.zone = detectedZone;
     }
     if (language) userUpdates.language = language;
@@ -124,7 +124,7 @@ router.put('/:id', async (req, res) => {
         email: updates.phone || existing.phone,
         password: hash,
         role: 'user',
-        department: detectedZone || existing.zone,
+        location: detectedZone || existing.zone,
         zone: detectedZone || existing.zone,
         language: language || existing.language || 'english',
         lat: lat !== undefined ? lat : existing.lat,

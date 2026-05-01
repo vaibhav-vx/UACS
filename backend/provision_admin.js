@@ -37,7 +37,7 @@ async function run() {
         password: hash,
         role: 'admin',
         name: 'Master Admin',
-        department: 'Root'
+        location: 'Root'
       });
     }
 

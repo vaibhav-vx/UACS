@@ -19,7 +19,7 @@ export default function EvacuationPage() {
 
   const [sharingLocation, setSharingLocation] = useState(false);
   const user = JSON.parse(localStorage.getItem('uacs_user') || '{}');
-  const userZone = user?.department || user?.location || user?.zone || 'General';
+  const userZone = user?.location || user?.zone || 'General';
 
   useEffect(() => {
     localStorage.setItem('uacs_go_bag', JSON.stringify(checklist));

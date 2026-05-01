@@ -19,7 +19,7 @@ export default function SettingsPage() {
   
   const [profileForm, setProfileForm] = useState({
     name: user.name || '',
-    zone: user.zone || user.department || localStorage.getItem('uacs_pref_zone') || 'General',
+    zone: user.zone || user.location || localStorage.getItem('uacs_pref_zone') || 'General',
     lat: user.lat || null,
     lng: user.lng || null
   });

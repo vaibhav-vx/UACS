@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
     let userZone = user.zone;
     let userCity = null;
     if (!userZone || userZone === 'General' || userZone === 'Field Ops') {
-      const detected = detectZone(user.department || user.location, user.lat, user.lng);
+      const detected = detectZone(user.location, user.lat, user.lng);
       userZone = detected.fullZone;
       userCity = detected.city;
       await dbUpdate('users', user.id, { zone: userZone });
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
         name: user.name,
         phone: user.email,
         role: user.role,
-        location: user.department,
+        location: user.location,
         zone: userZone,
         city: userCity,
         language: user.language || 'en',
@@ -101,14 +101,14 @@ router.post('/demo', async (req, res) => {
         email: demoEmail,
         password: hash,
         role: 'user',
-        department: 'Mumbai',
+        location: 'Mumbai',
         zone: 'Zone 2 — Mumbai',
         language: 'en',
       });
       console.log('[UACS AUTH] Created new Demo User');
     }
 
-    const detected = detectZone(demoUser.department, demoUser.lat, demoUser.lng);
+    const detected = detectZone(demoUser.location, demoUser.lat, demoUser.lng);
 
     const token = jwt.sign(
       { id: demoUser.id, phone: demoUser.email, role: demoUser.role },
@@ -125,7 +125,7 @@ router.post('/demo', async (req, res) => {
         name: demoUser.name,
         phone: demoUser.email,
         role: demoUser.role,
-        location: demoUser.department,
+        location: demoUser.location,
         zone: demoUser.zone || detected.fullZone,
         city: detected.city,
         language: demoUser.language || 'en',
@@ -203,7 +203,7 @@ router.post('/register', async (req, res) => {
       email:      normalizedPhone, // Use email column to store phone
       password:   hash,
       role:       'user',
-      department: location || null,
+      location:   location || null,
       zone:       detected.fullZone,
       language:   language || 'en',
       lat:        latitude || null,
@@ -277,7 +277,7 @@ router.get('/me', async (req, res) => {
     if (!user) return res.status(401).json({ error: 'User not found' });
 
     // ALWAYS re-detect zone to ensure accuracy
-    const locationText = user.department || user.location || '';
+    const locationText = user.location || '';
     const detected = detectZone(locationText, user.lat, user.lng);
     
     let currentZone = user.zone;
@@ -297,7 +297,7 @@ router.get('/me', async (req, res) => {
 
     const { password: _, ...safe } = user;
 
-    const rawLoc = (user.department && user.department !== 'Field Ops' && user.department !== 'General') ? user.department : (user.location && user.location !== 'Field Ops' && user.location !== 'General') ? user.location : null;
+    const rawLoc = (user.location && user.location !== 'Field Ops' && user.location !== 'General') ? user.location : null;
     const profileData = {
       ...safe,
       zone: rawLoc || (currentZone && currentZone !== 'Field Ops' && currentZone !== 'General' ? currentZone : 'Not Available'),
@@ -324,15 +324,15 @@ router.put('/profile', async (req, res) => {
       return res.status(401).json({ error: 'No token provided' });
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { name, department, zone, lat, lng } = req.body;
+    const { name, location, zone, lat, lng } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
 
-    const locationText = zone || department || '';
+    const locationText = zone || location || '';
     const detected = detectZone(locationText, lat, lng);
 
     const userUpdates = { name: name.trim() };
     if (locationText) {
-      userUpdates.department = locationText;
+      userUpdates.location = locationText;
       userUpdates.zone = detected.fullZone;
     }
     if (lat !== undefined) userUpdates.lat = lat;
@@ -399,7 +399,7 @@ router.get('/preferences', async (req, res) => {
     const user = await dbGetOne('users', { id: decoded.id });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const detected = detectZone(user.department, user.lat, user.lng);
+    const detected = detectZone(user.location, user.lat, user.lng);
     
     res.json({ 
       language: user.language || 'en', 
@@ -517,7 +517,7 @@ router.post('/migrate-zones', async (req, res) => {
     // Fix users
     const allUsers = await dbSelect('users', {}, { limit: 5000 });
     for (const u of allUsers) {
-      const detected = detectZone(u.department || u.location, u.lat, u.lng);
+      const detected = detectZone(u.location, u.lat, u.lng);
       const currentZone = u.zone || '';
       if (!currentZone || currentZone === 'General' || currentZone === 'Field Ops' || currentZone === 'Central Command') {
         await dbUpdate('users', u.id, { zone: detected.fullZone });

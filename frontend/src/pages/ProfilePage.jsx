@@ -231,7 +231,7 @@ export default function ProfilePage() {
             <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>{t('mobileNoChange') || 'Mobile number cannot be changed'}</p>
           </Field>
           <Field label={t('locationZone') || 'Location / Zone'} icon={Map}>
-            <input className="input-field" value={dept} onChange={e => setDept(e.target.value)} placeholder="e.g. Mumbai, Zone 4" />
+            <input className="input-field" value={dept} onChange={e => setDept(e.target.value)} placeholder="e.g. Mumbai, Delhi, Pune" />
           </Field>
           {profMsg.text && <InlineAlert type={profMsg.type} msg={profMsg.text} />}
           <button onClick={saveProfile} disabled={profSaving} className="btn-primary" style={{ width: 'fit-content', gap: 8 }}>
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                 className="input-field flex-1" 
                 value={zone} 
                 onChange={e => setZone(e.target.value)} 
-                placeholder={t('zonePlaceholder') || "e.g. Mumbai, Zone 4"}
+                placeholder={t('zonePlaceholder') || "e.g. Mumbai, Delhi NCR"}
               />
               <button 
                 type="button" 

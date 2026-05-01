@@ -1,12 +1,13 @@
 // ═══════════════════════════════════════
 // UACS Auth Routes — Login / Register / Logout / Me
+// FIXED: Real zone detection, no hardcoded zones
 // ═══════════════════════════════════════
 
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { dbGetOne, dbUpdate, dbInsert } from '../database/db.js';
-import { detectZoneFromLocation } from '../utils/zoneMapper.js';
+import { dbGetOne, dbUpdate, dbInsert, dbSelect } from '../database/db.js';
+import { detectZone, detectZoneFromLocation } from '../utils/zoneMapper.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'uacs_super_secret_2026';
@@ -34,6 +35,20 @@ router.post('/login', async (req, res) => {
     const validPassword = bcrypt.compareSync(password, user.password);
     if (!validPassword) return res.status(401).json({ error: 'Invalid mobile or password' });
 
+    // Re-detect zone from location if missing or stale
+    let userZone = user.zone;
+    let userCity = null;
+    if (!userZone || userZone === 'General' || userZone === 'Field Ops') {
+      const detected = detectZone(user.department || user.location, user.lat, user.lng);
+      userZone = detected.fullZone;
+      userCity = detected.city;
+      await dbUpdate('users', user.id, { zone: userZone });
+    } else {
+      // Extract city from existing zone string
+      const cityMatch = userZone.match(/—\s*(.*)/);
+      userCity = cityMatch ? cityMatch[1] : userZone;
+    }
+
     // Update last_login
     await dbUpdate('users', user.id, { last_login: new Date().toISOString() });
 
@@ -43,11 +58,22 @@ router.post('/login', async (req, res) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    console.log(`[UACS AUTH] User "${user.name}" (${user.role}) logged in`);
+    console.log(`[UACS AUTH] User "${user.name}" (${user.role}) logged in — Zone: ${userZone}`);
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, phone: user.email, role: user.role, department: user.department },
+      user: {
+        id: user.id,
+        name: user.name,
+        phone: user.email,
+        role: user.role,
+        location: user.department,
+        zone: userZone,
+        city: userCity,
+        language: user.language || 'en',
+        lat: user.lat,
+        lng: user.lng,
+      },
     });
   } catch (err) {
     console.error('[UACS AUTH] Login error:', err.message);
@@ -75,10 +101,14 @@ router.post('/demo', async (req, res) => {
         email: demoEmail,
         password: hash,
         role: 'user',
-        department: 'Demonstration'
+        department: 'Mumbai',
+        zone: 'Zone 2 — Mumbai',
+        language: 'en',
       });
       console.log('[UACS AUTH] Created new Demo User');
     }
+
+    const detected = detectZone(demoUser.department, demoUser.lat, demoUser.lng);
 
     const token = jwt.sign(
       { id: demoUser.id, phone: demoUser.email, role: demoUser.role },
@@ -90,7 +120,16 @@ router.post('/demo', async (req, res) => {
 
     res.json({
       token,
-      user: { id: demoUser.id, name: demoUser.name, phone: demoUser.email, role: demoUser.role, department: demoUser.department },
+      user: {
+        id: demoUser.id,
+        name: demoUser.name,
+        phone: demoUser.email,
+        role: demoUser.role,
+        location: demoUser.department,
+        zone: demoUser.zone || detected.fullZone,
+        city: detected.city,
+        language: demoUser.language || 'en',
+      },
     });
   } catch (err) {
     console.error('[UACS AUTH] Demo login error:', err.message);
@@ -132,75 +171,90 @@ router.post('/otp/send', async (req, res) => {
 // ─── POST /api/auth/register ────────────────────────────
 router.post('/register', async (req, res) => {
   try {
-    const { name, phone, password, department, latitude, longitude } = req.body;
+    const { name, phone, password, location, latitude, longitude, language } = req.body;
 
     if (!name?.trim() || !phone?.trim() || !password)
-      return res.status(400).json({ error: 'All fields are required' });
+      return res.status(400).json({ error: 'Name, mobile number, and password are required' });
+
+    if (name.trim().length < 2)
+      return res.status(400).json({ error: 'Name must be at least 2 characters' });
 
     const normalizedPhone = phone.trim().replace(/\s+/g, '');
 
-    if (normalizedPhone.length < 10)
-      return res.status(400).json({ error: 'Valid mobile number is required' });
+    // Extract digits only for validation
+    const digitsOnly = normalizedPhone.replace(/\D/g, '');
+    if (digitsOnly.length < 10)
+      return res.status(400).json({ error: 'Valid 10-digit mobile number is required' });
 
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!pwdRegex.test(password))
-      return res.status(400).json({ error: 'Password must be 8+ chars and include uppercase, lowercase, number, and special character' });
+    if (password.length < 8)
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
 
     // Check phone not already taken (using email column)
     const existing = await dbGetOne('users', { email: normalizedPhone });
     if (existing)
-      return res.status(409).json({ error: 'An account with this mobile number already exists' });
+      return res.status(409).json({ error: 'This number is already registered. Please login.' });
 
-    // Hash password and create user
+    // Hash password and detect zone
     const hash = bcrypt.hashSync(password, 10);
-    const detectedZone = detectZoneFromLocation(department);
+    const detected = detectZone(location, latitude, longitude);
+
     const newUser = await dbInsert('users', {
       name:       name.trim(),
       email:      normalizedPhone, // Use email column to store phone
       password:   hash,
-      role:       'user', // FORCE USER ROLE - NO EXCEPTIONS
-      department: detectedZone,
-      zone:       detectedZone,
+      role:       'user',
+      department: location || null,
+      zone:       detected.fullZone,
+      language:   language || 'en',
       lat:        latitude || null,
       lng:        longitude || null,
     });
 
-    // AUTO-SYNC TO RECIPIENTS (Deduplicated)
+    // AUTO-CREATE recipient entry
     const existingRecipient = await dbGetOne('recipients', { phone: normalizedPhone });
     if (!existingRecipient) {
       await dbInsert('recipients', {
         name:       name.trim(),
         phone:      normalizedPhone,
-        zone:       detectedZone,
-        language:   'english',
+        zone:       detected.fullZone,
+        language:   language || 'en',
         active:     true,
         lat:        latitude || null,
-        lng:        longitude || null
+        lng:        longitude || null,
       });
-      console.log(`[UACS AUTH] Auto-added ${normalizedPhone} to Recipients list with coordinates`);
+      console.log(`[UACS AUTH] Auto-added ${normalizedPhone} to Recipients list — ${detected.fullZone}`);
     } else {
-      // Update existing recipient if coordinates are provided
-      if (latitude && longitude) {
-        await dbUpdate('recipients', existingRecipient.id, { 
-          lat: latitude, 
-          lng: longitude, 
-          zone: detectedZone
-        });
-      }
+      // Update existing recipient with new zone data
+      await dbUpdate('recipients', existingRecipient.id, {
+        zone: detected.fullZone,
+        lat: latitude || existingRecipient.lat,
+        lng: longitude || existingRecipient.lng,
+      });
     }
 
-    // Sign JWT — same shape as login
+    // Sign JWT
     const token = jwt.sign(
       { id: newUser.id, phone: newUser.email, role: newUser.role },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    console.log(`[UACS AUTH] New user registered: "${newUser.name}" (${newUser.email})`);
+    console.log(`[UACS AUTH] New user registered: "${newUser.name}" — ${detected.fullZone}`);
 
     res.status(201).json({
       token,
-      user: { id: newUser.id, name: newUser.name, phone: newUser.email, role: newUser.role, department: newUser.department },
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        phone: newUser.email,
+        role: newUser.role,
+        location: location || null,
+        zone: detected.fullZone,
+        city: detected.city,
+        language: language || 'en',
+        lat: latitude || null,
+        lng: longitude || null,
+      },
     });
   } catch (err) {
     console.error('[UACS AUTH] Register error:', err.message);
@@ -222,15 +276,36 @@ router.get('/me', async (req, res) => {
 
     if (!user) return res.status(401).json({ error: 'User not found' });
 
-    const { password: _, ...safe } = user;
+    // ALWAYS re-detect zone to ensure accuracy
+    const locationText = user.department || user.location || '';
+    const detected = detectZone(locationText, user.lat, user.lng);
     
-    // Ensure all required fields are available for frontend
+    let currentZone = user.zone;
+    let currentCity = detected.city;
+
+    // Fix stale/missing zones
+    if (!currentZone || currentZone === 'General' || currentZone === 'Field Ops' || currentZone === 'Central Command') {
+      currentZone = detected.fullZone;
+      currentCity = detected.city;
+      // Persist the fix
+      await dbUpdate('users', user.id, { zone: currentZone });
+    } else {
+      // Extract city from zone string
+      const cityMatch = currentZone.match(/—\s*(.*)/);
+      currentCity = cityMatch ? cityMatch[1] : detected.city;
+    }
+
+    const { password: _, ...safe } = user;
+
     const profileData = {
       ...safe,
-      zone: safe.zone || safe.department || 'Zone 9 — Other Regions',
+      zone: currentZone,
+      city: currentCity,
+      location: user.department || user.location || null,
       language: safe.language || 'en',
+      phone: safe.email, // Expose phone field from email column
     };
-    
+
     res.json(profileData);
   } catch (err) {
     if (err.name === 'TokenExpiredError') return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
@@ -250,14 +325,14 @@ router.put('/profile', async (req, res) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     const { name, department, zone, lat, lng } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
-    
-    let detectedZone = department?.trim();
-    if (zone) detectedZone = detectZoneFromLocation(zone);
+
+    const locationText = zone || department || '';
+    const detected = detectZone(locationText, lat, lng);
 
     const userUpdates = { name: name.trim() };
-    if (detectedZone) {
-       userUpdates.department = detectedZone;
-       userUpdates.zone = detectedZone;
+    if (locationText) {
+      userUpdates.department = locationText;
+      userUpdates.zone = detected.fullZone;
     }
     if (lat !== undefined) userUpdates.lat = lat;
     if (lng !== undefined) userUpdates.lng = lng;
@@ -269,7 +344,7 @@ router.put('/profile', async (req, res) => {
        const existingRecipient = await dbGetOne('recipients', { phone: updated.email });
        if (existingRecipient) {
           const recUpdates = { name: updated.name };
-          if (detectedZone) recUpdates.zone = detectedZone;
+          if (locationText) recUpdates.zone = detected.fullZone;
           if (lat !== undefined) recUpdates.lat = lat;
           if (lng !== undefined) recUpdates.lng = lng;
           await dbUpdate('recipients', existingRecipient.id, recUpdates);
@@ -277,7 +352,7 @@ router.put('/profile', async (req, res) => {
     }
 
     const { password: _, ...safe } = updated;
-    res.json({ success: true, user: safe });
+    res.json({ success: true, user: { ...safe, city: detected.city } });
   } catch (err) {
     console.error('[UACS AUTH] Profile update error:', err.message);
     res.status(500).json({ error: err.message });
@@ -314,16 +389,17 @@ router.get('/preferences', async (req, res) => {
     if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'No token provided' });
     const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
     
-    // Preferences are synced between users and recipients table
     const user = await dbGetOne('users', { id: decoded.id });
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const detected = detectZone(user.department, user.lat, user.lng);
     
     res.json({ 
-      language: user.language || 'english', 
-      zone: user.zone || 'General', 
+      language: user.language || 'en', 
+      zone: user.zone || detected.fullZone, 
       lat: user.lat,
       lng: user.lng,
-      active: true // default active
+      active: true
     });
   } catch (err) {
     console.error('[UACS AUTH] Get preferences error:', err.message);
@@ -340,10 +416,12 @@ router.put('/preferences', async (req, res) => {
     
     const { language, zone, lat, lng, active } = req.body;
     
+    const detected = detectZone(zone, lat, lng);
+
     // 1. Update users table
     await dbUpdate('users', decoded.id, { 
-      zone: zone || 'General',
-      language: language || 'english',
+      zone: detected.fullZone,
+      language: language || 'en',
       lat: lat || null,
       lng: lng || null
     });
@@ -352,8 +430,8 @@ router.put('/preferences', async (req, res) => {
     const recipient = await dbGetOne('recipients', { phone: decoded.phone });
     if (recipient) {
       await dbUpdate('recipients', recipient.id, { 
-        zone: zone || 'General',
-        language: language || 'english',
+        zone: detected.fullZone,
+        language: language || 'en',
         lat: lat || null,
         lng: lng || null,
         active: active !== undefined ? active : true
@@ -363,8 +441,8 @@ router.put('/preferences', async (req, res) => {
       await dbInsert('recipients', {
         name: user.name,
         phone: decoded.phone,
-        language: language || 'english',
-        zone: zone || 'General',
+        language: language || 'en',
+        zone: detected.fullZone,
         lat: lat || null,
         lng: lng || null,
         active: active !== undefined ? active : true
@@ -402,8 +480,8 @@ router.post('/emergency-contact', async (req, res) => {
     await dbInsert('recipients', {
       name: `${user.name} (Emergency Contact)`,
       phone: normalizedPhone,
-      zone: 'Emergency', // Special zone
-      language: 'english',
+      zone: 'Emergency',
+      language: 'en',
       active: true
     });
     
@@ -412,6 +490,50 @@ router.post('/emergency-contact', async (req, res) => {
   } catch (err) {
     console.error('[UACS AUTH] Add emergency contact error:', err.message);
     res.status(500).json({ error: 'Server error adding emergency contact' });
+  }
+});
+
+// ─── POST /api/auth/migrate-zones — One-time zone fix ──────
+router.post('/migrate-zones', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer '))
+      return res.status(401).json({ error: 'No token provided' });
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    const caller = await dbGetOne('users', { id: decoded.id });
+    if (caller?.role !== 'admin')
+      return res.status(403).json({ error: 'Admin only' });
+
+    let fixedUsers = 0;
+    let fixedRecipients = 0;
+
+    // Fix users
+    const allUsers = await dbSelect('users', {}, { limit: 5000 });
+    for (const u of allUsers) {
+      const detected = detectZone(u.department || u.location, u.lat, u.lng);
+      const currentZone = u.zone || '';
+      if (!currentZone || currentZone === 'General' || currentZone === 'Field Ops' || currentZone === 'Central Command') {
+        await dbUpdate('users', u.id, { zone: detected.fullZone });
+        fixedUsers++;
+      }
+    }
+
+    // Fix recipients
+    const allRecipients = await dbSelect('recipients', {}, { limit: 5000 });
+    for (const r of allRecipients) {
+      const detected = detectZone(r.zone, r.lat, r.lng);
+      // If zone doesn't contain "—", it's probably a raw city name
+      if (r.zone && !r.zone.includes('—')) {
+        await dbUpdate('recipients', r.id, { zone: detected.fullZone });
+        fixedRecipients++;
+      }
+    }
+
+    console.log(`[UACS MIGRATION] Fixed ${fixedUsers} users and ${fixedRecipients} recipients`);
+    res.json({ success: true, fixedUsers, fixedRecipients });
+  } catch (err) {
+    console.error('[UACS MIGRATION] Error:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

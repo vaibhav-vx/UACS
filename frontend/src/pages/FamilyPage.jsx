@@ -55,7 +55,7 @@ export default function FamilyPage() {
       id: Date.now(),
       name: newName,
       phone: newPhone,
-      zone: 'Zone 4',
+      zone: user?.zone || 'General',
       status: 'no_alerts',
       lastActive: 'Just now',
       emergencyContact: false

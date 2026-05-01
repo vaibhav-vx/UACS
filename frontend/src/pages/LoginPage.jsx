@@ -1,15 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Lock, Mail, Eye, EyeOff, Loader2, AlertCircle, Sun, Moon, Globe, ChevronDown, 
   User, Map as MapIcon, UserPlus, LogIn, CheckCircle2, ArrowRight, Smartphone, ScrollText, 
-  KeyRound
+  KeyRound, MapPin, Languages
 } from 'lucide-react';
 import { authApi } from '../api';
 import { useTheme } from '../ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
+import { detectZone } from '../utils/zoneMapper';
 import MapZonePicker from '../components/MapZonePicker';
 import toast from 'react-hot-toast';
+
+const REG_LANGUAGES = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'hi', label: 'हिंदी (Hindi)', flag: '🇮🇳' },
+  { code: 'mr', label: 'मराठी (Marathi)', flag: '🇮🇳' },
+  { code: 'ta', label: 'தமிழ் (Tamil)', flag: '🇮🇳' },
+  { code: 'te', label: 'తెలుగు (Telugu)', flag: '🇮🇳' },
+];
 
 // ── Animated background orbs ─────────────────────────────
 function BgOrbs() {
@@ -121,23 +130,35 @@ export default function LoginPage() {
   const [regPassword, setRegPassword]     = useState('');
   const [regConfirm, setRegConfirm]       = useState('');
   const [showRegPwd, setShowRegPwd]       = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [regLoading, setRegLoading]       = useState(false);
   const [regError, setRegError]           = useState('');
   const [regSuccess, setRegSuccess]       = useState(false);
   const [regLat, setRegLat]               = useState(null);
   const [regLng, setRegLng]               = useState(null);
+  const [regLanguage, setRegLanguage]     = useState('en');
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [zonePreview, setZonePreview]     = useState(null);
+  const debounceRef = useRef(null);
 
-  // Password Strength Check
-  const getPasswordCriteria = (pwd) => ({
-    length: pwd.length >= 8,
-    upper: /[A-Z]/.test(pwd),
-    lower: /[a-z]/.test(pwd),
-    number: /\d/.test(pwd),
-    special: /[@$!%*?&]/.test(pwd),
-  });
-  const criteria = getPasswordCriteria(regPassword);
-  const isPasswordStrong = Object.values(criteria).every(Boolean);
+  // Debounced zone preview from location text
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (regDept.trim() || regLat) {
+        const detected = detectZone(regDept.trim(), regLat, regLng);
+        setZonePreview(detected);
+      } else {
+        setZonePreview(null);
+      }
+    }, 500);
+    return () => clearTimeout(debounceRef.current);
+  }, [regDept, regLat, regLng]);
+
+  // Password validation
+  const isPasswordValid = regPassword.length >= 8;
+  const passwordsMatch = regConfirm.length > 0 && regPassword === regConfirm;
+  const canSubmitReg = regName.trim().length >= 2 && regPhone.trim().length >= 10 && isPasswordValid && passwordsMatch;
   const [langOpen, setLangOpen]           = useState(false);
   const navigate                          = useNavigate();
   const [searchParams]                    = useSearchParams();
@@ -195,10 +216,10 @@ export default function LoginPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setRegError('');
-    if (!regName.trim())  { setRegError('Full name is required'); return; }
-    if (!regPhone.trim()) { setRegError('Mobile number is required'); return; }
-    if (!isPasswordStrong) { setRegError('Please meet all password requirements'); return; }
-    if (!regPassword)     { setRegError('Password is required'); return; }
+    if (regName.trim().length < 2) { setRegError('Name must be at least 2 characters'); return; }
+    if (regPhone.replace(/\D/g, '').length < 10) { setRegError('Valid 10-digit mobile number is required'); return; }
+    if (regPassword.length < 8) { setRegError('Password must be at least 8 characters'); return; }
+    if (regPassword !== regConfirm) { setRegError('Passwords do not match'); return; }
 
     setRegLoading(true);
     try {
@@ -206,9 +227,10 @@ export default function LoginPage() {
         name: regName.trim(), 
         phone: regPhone.trim(), 
         password: regPassword, 
-        department: regDept.trim(),
+        location: regDept.trim(),
         latitude: regLat,
-        longitude: regLng
+        longitude: regLng,
+        language: regLanguage,
       });
       toast.success(t('regSuccess') || 'Registration successful!');
       localStorage.setItem('uacs_token', res.data.token);
@@ -230,9 +252,6 @@ export default function LoginPage() {
       const res = await authApi.demo();
       localStorage.setItem('uacs_token', res.data.token);
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
-      // Set demo preferences for better initial visualization
-      localStorage.setItem('uacs_pref_zone', 'Zone 4');
-      localStorage.setItem('uacs_pref_lang', 'hindi');
       toast.success(t('demoLoginSuccess') || 'Welcome to Demo Portal');
       navigate('/dashboard');
     } catch (err) {
@@ -431,8 +450,8 @@ export default function LoginPage() {
             ) : (
               <>
                 <div style={{ marginBottom: 20 }}>
-                  <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{t('createAccount') || 'Create an account'}</h2>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t('joinUacs') || 'Join UACS as an authorized administrator'}</p>
+                  <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{t('createAccount') || 'Create Your Account'}</h2>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t('joinUacs') || 'Citizen Safety Portal — Register to receive zone alerts'}</p>
                 </div>
 
                 {regError && (
@@ -467,31 +486,37 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  {/* Location / Zone Field — The star of the show */}
-                  <div style={{ position: 'relative' }}>
+                  {/* Location Field with Map Picker */}
+                  <div>
                     <Field
                       id="reg-dept"
-                      label={t('locationZone') || 'Location / Area'}
-                      icon={Map}
+                      label={t('locationZone') || 'Your Location'}
+                      icon={MapPin}
                       value={regDept}
                       onChange={e => { setRegDept(e.target.value); setRegError(''); }}
-                      placeholder="e.g. Mumbai, Zone 4"
-                      hint={regLat ? `📌 Pinned: ${regLat.toFixed(4)}, ${regLng.toFixed(4)}` : t('mapHint') || 'Enter area name or use map icon'}
+                      placeholder="Enter your city or area"
+                      hint={regLat ? `📌 Pinned: ${regLat.toFixed(4)}, ${regLng.toFixed(4)}` : t('mapHint') || 'Enter area name or pick from map'}
                       rightEl={
                         <button
                           type="button"
                           onClick={() => setShowMapPicker(true)}
+                          title="Pick location on map"
                           style={{
                             position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
-                            height: '80%', padding: '0 12px', background: 'var(--accent)',
-                            color: 'white', border: 'none', borderRadius: '6px', fontSize: '11px',
-                            fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                            height: '80%', padding: '0 10px', background: 'var(--accent)',
+                            color: 'white', border: 'none', borderRadius: '6px', fontSize: '16px',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center',
                           }}
                         >
-                          <MapIcon size={14} /> MAP
+                          📍
                         </button>
                       }
                     />
+                    {zonePreview && (
+                      <p style={{ fontSize: 12, color: '#22c55e', marginTop: 4, fontWeight: 600 }}>
+                        📍 Detected Zone: {zonePreview.zone} — {zonePreview.city}
+                      </p>
+                    )}
                   </div>
 
                   {showMapPicker && (
@@ -508,7 +533,32 @@ export default function LoginPage() {
                     />
                   )}
 
-                  <div style={{ position: 'relative' }}>
+                  {/* Language Selector */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: 'var(--text-secondary)' }}>
+                      Preferred Language
+                    </label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {REG_LANGUAGES.map(l => (
+                        <button
+                          key={l.code}
+                          type="button"
+                          onClick={() => setRegLanguage(l.code)}
+                          style={{
+                            padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                            border: `1px solid ${regLanguage === l.code ? 'var(--accent-border)' : 'var(--border)'}`,
+                            background: regLanguage === l.code ? 'var(--accent-bg)' : 'var(--bg-input)',
+                            color: regLanguage === l.code ? 'var(--accent)' : 'var(--text-secondary)',
+                          }}
+                        >
+                          {l.flag} {l.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div>
                     <Field
                       id="reg-password"
                       label={t('passwordLabel') || 'Password'}
@@ -516,26 +566,45 @@ export default function LoginPage() {
                       type={showRegPwd ? 'text' : 'password'}
                       value={regPassword}
                       onChange={e => { setRegPassword(e.target.value); setRegError(''); }}
-                      placeholder={t('min8Chars') || "Min 8 characters"}
+                      placeholder="Create a strong password"
                       autoComplete="new-password"
                       rightEl={<EyeBtn show={showRegPwd} toggle={() => setShowRegPwd(v => !v)} />}
                     />
+                    <PasswordStrength password={regPassword} />
                   </div>
-                  
-                  <PasswordStrength password={regPassword} />
+
+                  {/* Confirm Password */}
+                  <div>
+                    <Field
+                      id="reg-confirm"
+                      label="Confirm Password"
+                      icon={Lock}
+                      type={showConfirmPwd ? 'text' : 'password'}
+                      value={regConfirm}
+                      onChange={e => { setRegConfirm(e.target.value); setRegError(''); }}
+                      placeholder="Re-enter your password"
+                      autoComplete="new-password"
+                      rightEl={<EyeBtn show={showConfirmPwd} toggle={() => setShowConfirmPwd(v => !v)} />}
+                    />
+                    {regConfirm.length > 0 && (
+                      <p style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: passwordsMatch ? '#22c55e' : '#ef4444' }}>
+                        {passwordsMatch ? '✅ Passwords match' : '❌ Passwords do not match'}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                   <div style={{ marginTop: 8 }}>
                     <button
                       type="submit"
-                      disabled={regLoading}
+                      disabled={regLoading || !canSubmitReg}
                       className="btn-primary"
-                      style={{ width: '100%', height: 48, borderRadius: 12, fontSize: 15, fontWeight: 700, gap: 10 }}
+                      style={{ width: '100%', height: 48, borderRadius: 12, fontSize: 15, fontWeight: 700, gap: 10, opacity: canSubmitReg ? 1 : 0.5 }}
                     >
                       {regLoading ? (
                         <><Loader2 className="animate-spin" style={{ width: 20, height: 20 }} /> {t('creatingAccount') || 'Creating Account...'}</>
                       ) : (
-                        <><CheckCircle2 style={{ width: 20, height: 20 }} /> {t('createAccount') || 'Create Account'}</>
+                        <><CheckCircle2 style={{ width: 20, height: 20 }} /> Create My Account</>
                       )}
                     </button>
                     

@@ -36,11 +36,32 @@ export default function DashboardPage() {
   const [expiryAlertId, setExpiryAlertId] = useState(null);
   const [manualExpiryReason, setManualExpiryReason] = useState('');
   const [showMap, setShowMap] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
   
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.role?.toLowerCase() === 'admin';
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+
+  useEffect(() => {
+    if (!isAdmin) {
+      const fetchWeather = async () => {
+        try {
+          const lat = user?.lat || 19.0760; // Default to Mumbai
+          const lng = user?.lng || 72.8777;
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,uv_index`);
+          if (res.ok) {
+            const data = await res.json();
+            setWeatherData(data.current);
+          }
+        } catch (err) {
+          console.error("Failed to fetch weather data", err);
+        }
+      };
+      fetchWeather();
+    }
+  }, [isAdmin, user?.lat, user?.lng]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,6 +75,7 @@ export default function DashboardPage() {
       setExpiredMessages(e.data);
       setDraftMessages(d.data);
       setStats(s.data);
+      setLastRefresh(new Date());
 
       if (isAdmin) {
         const [safStats, safRecent] = await Promise.all([
@@ -63,7 +85,7 @@ export default function DashboardPage() {
         setSafetyStats(safStats.data);
         setRecentReports(safRecent.data);
       } else {
-        const userZone = user?.zone || 'General';
+        const userZone = user?.zone || user?.department || 'General';
         const [rec, saf] = await Promise.all([
           recipientsApi.getAll(userZone),
           messagesApi.getSafetyStats()
@@ -78,7 +100,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, user?.zone]);
 
   useEffect(() => { 
     fetchData(); 
@@ -179,23 +201,51 @@ export default function DashboardPage() {
   if (loading) return (<div className="space-y-6"><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="glass-card p-5 h-24 shimmer rounded-xl"/>)}</div><div className="space-y-3">{[1,2,3].map(i=><div key={i} className="glass-card p-6 h-32 shimmer rounded-xl"/>)}</div></div>);
 
   if (!isAdmin) {
-    const userZone = user?.zone || 'General';
+    const userZone = user?.zone || user?.department || 'General';
     const userPhone = user?.phone || user?.email || 'Not Provided';
     const userLang = user?.language || 'en';
-    const userCoords = user?.lat && user?.lng ? `${user.lat.toFixed(4)}, ${user.lng.toFixed(4)}` : 'GPS Not Synced';
+    const userCity = user?.city || (userZone.match(/—\s*(.*)/) ? userZone.match(/—\s*(.*)/)[1] : userZone);
+    const userCoords = user?.lat && user?.lng ? `${Number(user.lat).toFixed(4)}, ${Number(user.lng).toFixed(4)}` : 'GPS Not Synced';
     
     // Improved logic for identifying myAlerts vs nearbyAlerts
     const zoneNumberMatch = userZone.match(/Zone (\d+)/);
-    const zoneNameMatch = userZone.match(/—\s*(.*)/);
-    const userCity = zoneNameMatch ? zoneNameMatch[1] : userZone;
 
     const myAlerts = activeMessages.filter(msg => {
       if (!msg.target_zone || msg.target_zone === 'All Zones' || msg.target_zone === 'General') return true;
-      return msg.target_zone.includes(userZone) || (zoneNumberMatch && msg.target_zone.includes(`Zone ${zoneNumberMatch[1]}`)) || (userCity && msg.target_zone.includes(userCity));
+      const tz = msg.target_zone;
+      return tz.includes(userZone) || (zoneNumberMatch && tz.includes(`Zone ${zoneNumberMatch[1]}`)) || (userCity && tz.toLowerCase().includes(userCity.toLowerCase()));
     });
 
     const hour = new Date().getHours();
     const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+    // Determine dynamic weather alert or text
+    let weatherTitle = "Current Weather";
+    let weatherEmoji = "☀️";
+    let weatherAlert = null;
+    
+    if (weatherData) {
+      const { temperature_2m, weather_code, uv_index } = weatherData;
+      if (weather_code === 0) { weatherEmoji = '☀️'; weatherTitle = 'Clear Sky'; }
+      else if (weather_code >= 1 && weather_code <= 3) { weatherEmoji = '⛅'; weatherTitle = 'Partly Cloudy'; }
+      else if (weather_code === 45 || weather_code === 48) { weatherEmoji = '🌫️'; weatherTitle = 'Foggy'; }
+      else if (weather_code >= 51 && weather_code <= 65) { weatherEmoji = '🌧️'; weatherTitle = 'Rain'; }
+      else if (weather_code >= 71 && weather_code <= 75) { weatherEmoji = '❄️'; weatherTitle = 'Snow'; }
+      else if (weather_code >= 80 && weather_code <= 82) { weatherEmoji = '🌦️'; weatherTitle = 'Showers'; }
+      else if (weather_code >= 95) { weatherEmoji = '🌩️'; weatherTitle = 'Thunderstorm'; }
+      
+      if (temperature_2m >= 38) {
+        weatherTitle = "Severe Heatwave";
+        weatherEmoji = "🥵";
+        weatherAlert = "⚠️ High risk of dehydration";
+      } else if (uv_index >= 8) {
+        weatherAlert = "⚠️ Extreme UV — Use Sunscreen";
+      } else if (weather_code >= 95) {
+        weatherAlert = "⚠️ Lightning Risk — Stay Indoors";
+      } else if (weather_code >= 61 && weather_code <= 65) {
+        weatherAlert = "⚠️ Heavy Rain Warning";
+      }
+    }
 
     return (
       <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
@@ -211,8 +261,8 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 px-4 py-2 rounded-full">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-xs font-bold text-green-500 tracking-widest uppercase">LIVE SYNCHRONIZATION</span>
-            <span className="text-[10px] text-theme-dim ml-2 border-l border-theme-border pl-2">Updates every 30s</span>
+            <span className="text-xs font-bold text-green-500 tracking-widest uppercase">LIVE</span>
+            <span className="text-[10px] text-theme-dim ml-2 border-l border-theme-border pl-2">Last updated: {lastRefresh.toLocaleTimeString()}</span>
           </div>
         </div>
 
@@ -227,7 +277,7 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-black tracking-tight">{userZone}</h1>
+                  <h1 className="text-3xl font-black tracking-tight">{userCity} ({zoneNumberMatch ? `Zone ${zoneNumberMatch[1]}` : userZone})</h1>
                   <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase border border-green-500/20 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> Area Synced
                   </span>
@@ -280,8 +330,8 @@ export default function DashboardPage() {
                {myAlerts.length === 0 ? (
                   <div className="glass-card p-12 text-center rounded-3xl border-dashed border-2 bg-theme-surface/50">
                     <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]" />
-                    <h3 className="text-xl font-black mb-2">{t('allClear') || 'All Clear in Your Zone'}</h3>
-                    <p className="text-sm text-theme-muted">{t('noActiveZoneAlerts') || 'There are no active emergency alerts matching your exact synchronized location.'}</p>
+                    <h3 className="text-xl font-black mb-2">{`✅ All Clear in ${userCity}`}</h3>
+                    <p className="text-sm text-theme-muted">{t('noActiveZoneAlerts') || `No active alerts in ${userCity}`}</p>
                   </div>
                ) : (
                  <div className="grid gap-6">
@@ -391,23 +441,27 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-8">
-            {/* WEATHER WIDGET (Seasonal: April Summer) */}
-            <section className="glass-card p-6 rounded-3xl border-0 shadow-xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-2 opacity-20"><Globe className="w-24 h-24 text-orange-500" /></div>
+            {/* LIVE WEATHER WIDGET */}
+            <section className={`glass-card p-6 rounded-3xl border-0 shadow-xl relative overflow-hidden ${weatherAlert ? 'bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20' : 'bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20'}`}>
+               <div className="absolute top-0 right-0 p-2 opacity-20"><Globe className={`w-24 h-24 ${weatherAlert ? 'text-orange-500' : 'text-blue-500'}`} /></div>
                <div className="flex items-start gap-4 mb-4 relative z-10">
-                  <div className="text-4xl animate-pulse mt-1 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">☀️</div>
+                  <div className={`text-4xl animate-pulse mt-1 drop-shadow-[0_0_10px_rgba(${weatherAlert ? '249,115,22' : '59,130,246'},0.5)]`}>{weatherEmoji}</div>
                   <div>
-                     <h3 className="text-xl font-black text-orange-600 leading-tight">Severe Heatwave<br/><span className="text-theme-primary">{userCity || 'Your City'}</span></h3>
+                     <h3 className={`text-xl font-black leading-tight ${weatherAlert ? 'text-orange-600' : 'text-blue-600'}`}>{weatherTitle}<br/><span className="text-theme-primary">{userCity || 'Your City'}</span></h3>
                   </div>
                </div>
                <div className="grid grid-cols-2 gap-3 text-xs font-bold text-theme-muted mb-4 relative z-10">
-                  <div className="p-3 bg-theme-surface/80 backdrop-blur-sm rounded-xl border border-theme-border shadow-inner">Temp: <span className="text-theme-primary text-sm block font-black">41°C</span></div>
-                  <div className="p-3 bg-theme-surface/80 backdrop-blur-sm rounded-xl border border-theme-border shadow-inner">Humidity: <span className="text-theme-primary text-sm block font-black">45%</span></div>
-                  <div className="p-3 bg-red-500/10 backdrop-blur-sm rounded-xl border border-red-500/20 col-span-2">UV Index: <span className="text-red-500 text-sm block font-black">11 (Extreme)</span></div>
+                  <div className="p-3 bg-theme-surface/80 backdrop-blur-sm rounded-xl border border-theme-border shadow-inner">Temp: <span className="text-theme-primary text-sm block font-black">{weatherData ? `${weatherData.temperature_2m}°C` : '--°C'}</span></div>
+                  <div className="p-3 bg-theme-surface/80 backdrop-blur-sm rounded-xl border border-theme-border shadow-inner">Humidity: <span className="text-theme-primary text-sm block font-black">{weatherData ? `${weatherData.relative_humidity_2m}%` : '--%'}</span></div>
+                  <div className={`p-3 backdrop-blur-sm rounded-xl col-span-2 shadow-inner ${weatherData?.uv_index >= 8 ? 'bg-red-500/10 border-red-500/20' : 'bg-theme-surface/80 border-theme-border'}`}>
+                    UV Index: <span className={`text-sm block font-black ${weatherData?.uv_index >= 8 ? 'text-red-500' : 'text-theme-primary'}`}>{weatherData ? weatherData.uv_index : '--'} {weatherData?.uv_index >= 8 ? '(Extreme)' : ''}</span>
+                  </div>
                </div>
-               <div className="w-full px-4 py-3 rounded-xl bg-red-500 text-white font-black text-[10px] text-center uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.4)] relative z-10">
-                 ⚠️ High risk of dehydration
-               </div>
+               {weatherAlert && (
+                 <div className="w-full px-4 py-3 rounded-xl bg-red-500 text-white font-black text-[10px] text-center uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.4)] relative z-10">
+                   {weatherAlert}
+                 </div>
+               )}
             </section>
 
             {/* NEARBY SAFETY HUBS */}
@@ -747,7 +801,7 @@ export default function DashboardPage() {
                   <input
                     type="text"
                     className="input-field w-full"
-                    placeholder={t('locationPlaceholder') || "e.g. Mumbai, Zone 4 or exact address"}
+                    placeholder={t('locationPlaceholder') || "e.g. Mumbai, Delhi or exact address"}
                     value={emergencyZone}
                     onChange={e => setEmergencyZone(e.target.value)}
                   />

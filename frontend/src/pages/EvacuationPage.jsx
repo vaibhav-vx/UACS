@@ -18,7 +18,8 @@ export default function EvacuationPage() {
   });
 
   const [sharingLocation, setSharingLocation] = useState(false);
-  const userZone = localStorage.getItem('uacs_pref_zone') || 'General';
+  const user = JSON.parse(localStorage.getItem('uacs_user') || '{}');
+  const userZone = user?.zone || 'General';
 
   useEffect(() => {
     localStorage.setItem('uacs_go_bag', JSON.stringify(checklist));
@@ -112,7 +113,7 @@ export default function EvacuationPage() {
              </h2>
              <div className="space-y-4">
                 <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
-                   <h4 className="font-bold text-orange-700 mb-2">IF HEATWAVE ALERT (Active in Zone 4):</h4>
+                   <h4 className="font-bold text-orange-700 mb-2">IF HEATWAVE ALERT (Active in your zone):</h4>
                    <ul className="space-y-2 text-sm text-orange-800/80">
                       <li className="flex items-start gap-2"><ArrowRight className="w-4 h-4 mt-0.5 shrink-0" /> Stay hydrated. Drink at least 4-5 liters of water daily.</li>
                       <li className="flex items-start gap-2"><ArrowRight className="w-4 h-4 mt-0.5 shrink-0" /> Avoid outdoors between 12:00 PM and 4:00 PM.</li>

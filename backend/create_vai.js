@@ -26,14 +26,15 @@ async function addVaiUser() {
   try {
     const existing = await dbGetOne('users', { email: normalizedPhone });
     if (existing) {
-      console.log(`[UACS] User with phone number ${normalizedPhone} already exists. Proceeding to update password.`);
+      console.log(`[UACS] User with phone number ${normalizedPhone} already exists. Updating to user account with new password.`);
       await dbUpdate('users', existing.id, {
         name: name,
         password: hash,
         location: location,
-        zone: location
+        zone: location,
+        role: 'user' // Explicitly set role to user!
       });
-      console.log(`[UACS] Updated user Vai`);
+      console.log(`[UACS] Updated existing user to 'user' role`);
     } else {
       const newUser = await dbInsert('users', {
         name: name,
@@ -67,7 +68,7 @@ async function addVaiUser() {
       console.log(`[UACS] Updated recipient Vai successfully.`);
     }
 
-    console.log('[UACS] User Vai created and linked to recipients successfully.');
+    console.log('[UACS] User Vai completely updated as a user account.');
     process.exit(0);
   } catch (err) {
     console.error('[UACS] Error creating user Vai:', err);

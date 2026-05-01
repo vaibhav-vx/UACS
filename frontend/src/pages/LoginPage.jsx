@@ -206,7 +206,7 @@ export default function LoginPage() {
       localStorage.setItem('uacs_token', res.data.token);
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
       setUser(res.data.user);
-      navigate('/dashboard');
+      // The useEffect will automatically navigate to /dashboard when 'user' state is updated
     } catch (err) {
       setLoginError(err.response?.data?.error || 'Invalid mobile or password');
     } finally {
@@ -237,9 +237,8 @@ export default function LoginPage() {
       toast.success(t('regSuccess') || 'Registration successful!');
       localStorage.setItem('uacs_token', res.data.token);
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
-      setUser(res.data.user);
       setRegSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setTimeout(() => setUser(res.data.user), 1500); // setUser will trigger the useEffect navigation
     } catch (err) {
       setRegError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
@@ -257,7 +256,7 @@ export default function LoginPage() {
       localStorage.setItem('uacs_user', JSON.stringify(res.data.user));
       setUser(res.data.user);
       toast.success(t('demoLoginSuccess') || 'Welcome to Demo Portal');
-      navigate('/dashboard');
+      // The useEffect will automatically navigate to /dashboard
     } catch (err) {
       setRegError(err.response?.data?.error || 'Failed to login as Demo User');
       setRegLoading(false);

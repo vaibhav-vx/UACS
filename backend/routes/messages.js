@@ -85,14 +85,27 @@ router.post('/emergency', async (req, res) => {
     // Dispatch to SMS
     try {
       const recipientList = await dbSelect('recipients', { active: true }, { orderBy: 'created_at', ascending: false, limit: 5000 });
-      const zoneFiltered = target_zone && target_zone !== 'All Zones' && target_zone.trim()
-        ? recipientList.filter(r => {
-            if (!r.zone) return true;
-            const targetZoneBase = target_zone.split('(')[0].trim().toLowerCase();
-            const recipZoneBase = r.zone.split('(')[0].trim().toLowerCase();
-            return recipZoneBase === targetZoneBase || targetZoneBase.includes(recipZoneBase) || recipZoneBase.includes(targetZoneBase);
-          })
-        : recipientList;
+      const zoneFiltered = recipientList.filter(r => {
+        if (!target_zone || target_zone.toLowerCase() === 'all' || target_zone.toLowerCase() === 'all zones' || target_zone.toLowerCase() === 'general' || target_zone.toLowerCase() === 'all india') return true;
+        if (!r.zone) return true;
+
+        const targetBase = target_zone.split('(')[0].trim().toLowerCase();
+        const recipBase = r.zone.split('(')[0].trim().toLowerCase();
+
+        // 1. Direct or substring match
+        if (targetBase === recipBase || recipBase.includes(targetBase) || targetBase.includes(recipBase)) return true;
+
+        // 2. Token/Word match — check if any significant word matches
+        const targetTokens = targetBase.split(/[\s,.-]+/).filter(w => w.length > 2);
+        const recipTokens = recipBase.split(/[\s,.-]+/).filter(w => w.length > 2);
+
+        for (const t of targetTokens) {
+          if (recipTokens.includes(t)) return true;
+        }
+
+        return false;
+      });
+
       if (zoneFiltered.length > 0) {
         await sendBulkSMS(zoneFiltered, msgObj);
       }

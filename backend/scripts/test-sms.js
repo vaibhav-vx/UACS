@@ -24,7 +24,7 @@ async function test() {
   try {
     // This will at least verify that the twilio package is installed and can be initialized
     console.log('Attempting to initialize Twilio client...');
-    const result = await sendSMS('+15555555555', 'Test message from UACS diagnostic script');
+    const result = await sendSMS('+918169825915', 'Test message from UACS diagnostic script');
     console.log('Result:', result);
   } catch (err) {
     console.error('Test failed:', err.message);

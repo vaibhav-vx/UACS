@@ -46,50 +46,44 @@ export default function UserNotificationBar({ user }) {
 
   return (
     <div className="relative mb-6">
-      {/* ── Notification Header / Trigger ── */}
-      <div className="glass-card flex items-center justify-between p-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-transparent border border-indigo-500/20 rounded-2xl shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center flex-shrink-0 animate-pulse-slow">
-            <Bell className="w-5 h-5 text-indigo-400" />
-            {stateMessages.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900" />
-            )}
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              {t('yourAlertSystem') || 'Disaster Alert Notifications'}
-              <span className="text-[10px] bg-indigo-500/20 text-indigo-300 font-extrabold px-2 py-0.5 rounded-full border border-indigo-500/30 tracking-wider">
-                {userZone}
-              </span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {stateMessages.length > 0
-                ? `${stateMessages.length} critical alerts active in your state/zone`
-                : 'Your airspace is completely clear. No active alerts.'}
-            </p>
-          </div>
+      {/* ── Mini Header Bar with Notify Toggle ── */}
+      <div className="flex items-center justify-between py-2 px-1 border-b border-white/5 mb-4 select-none">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs font-bold text-slate-400">
+            Airspace Active Protection &middot; {userZone}
+          </span>
         </div>
 
+        {/* The Toggle Button named "Notify" */}
         <button
           onClick={() => setOpen(!open)}
-          className="btn-primary text-xs py-2.5 px-4 font-bold shadow-indigo-600/20 hover:scale-[1.02] flex items-center gap-2"
+          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
+            open 
+              ? 'bg-indigo-600 text-white border border-indigo-500 shadow-indigo-600/30 hover:bg-indigo-700' 
+              : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10'
+          }`}
+          id="notify-toggle-btn"
         >
-          {open ? 'Close Panel' : 'Open Alert History'}
-          <ChevronRight className={`w-4 h-4 transition-all duration-300 ${open ? 'rotate-90' : ''}`} />
+          <Bell className={`w-4 h-4 text-indigo-400 transition-all duration-300 ${open ? 'scale-110' : ''}`} />
+          <span>Notify</span>
+          {stateMessages.length > 0 && !open && (
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-bounce" />
+          )}
         </button>
       </div>
 
-      {/* ── Notification & Alert History Panel ── */}
+      {/* ── Notification & Alert Drawer Panel ── */}
       {open && (
-        <div className="mt-4 glass-card bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-fade-in flex flex-col min-h-[350px] max-h-[500px]">
+        <div className="mt-2 glass-card bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-fade-in flex flex-col min-h-[350px] max-h-[500px]">
           {/* Header & Close Button */}
           <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
             <div>
               <div className="text-sm font-extrabold text-white flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-500" />
-                Alert History
+                <ShieldAlert className="w-4 h-4 text-indigo-400" />
+                Latest Alerts & Notifications
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Filter disaster alerts by scope</p>
+              <p className="text-xs text-slate-400 mt-0.5">Your regional safety command</p>
             </div>
             <button
               onClick={() => { setOpen(false); setSelectedAlert(null); }}
@@ -111,7 +105,7 @@ export default function UserNotificationBar({ user }) {
                 }`}
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
-                {userZone} Disaster Alerts
+                {userZone} Alert Notifications
               </button>
               <button
                 onClick={() => setSelectedTab('india')}
@@ -122,7 +116,7 @@ export default function UserNotificationBar({ user }) {
                 }`}
               >
                 <Globe className="w-3.5 h-3.5" />
-                India Disaster Alerts
+                India Alert Notifications
               </button>
             </div>
           )}
@@ -163,7 +157,7 @@ export default function UserNotificationBar({ user }) {
                     </p>
                   </div>
 
-                  {/* Multilingual translations preview */}
+                  {/* Regional Translations */}
                   {selectedAlert.translations && typeof selectedAlert.translations === 'string' && (
                     <div className="space-y-1.5 pt-1 border-t border-white/5">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mt-2">Verified Regional Translations</span>
@@ -192,11 +186,11 @@ export default function UserNotificationBar({ user }) {
               /* ── No Alerts fallback ── */
               <div className="flex flex-col items-center justify-center h-[200px] text-center p-4">
                 <CheckCircle2 className="w-10 h-10 text-emerald-500/50 mb-3 animate-bounce-slow" />
-                <p className="text-xs font-bold text-slate-300">No Disaster Alerts found</p>
+                <p className="text-xs font-bold text-slate-300">No Notifications found</p>
                 <p className="text-[11px] text-slate-500 mt-1 max-w-[250px]">
                   {selectedTab === 'state'
-                    ? `Your state (${userZone}) currently has no active alert reports.`
-                    : 'The airspace for India has no active emergency alert reports.'}
+                    ? `Your state (${userZone}) currently has no active notification reports.`
+                    : 'The airspace for India has no active emergency notification reports.'}
                 </p>
               </div>
             ) : (

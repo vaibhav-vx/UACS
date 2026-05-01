@@ -82,6 +82,19 @@ router.post('/emergency', async (req, res) => {
 
     const msgObj = { ...newMsg, channels, languages, translations };
 
+    // Dispatch to SMS
+    try {
+      const recipientList = await dbSelect('recipients', { active: true }, { orderBy: 'created_at', ascending: false, limit: 5000 });
+      const zoneFiltered = target_zone && target_zone !== 'All Zones' && target_zone.trim()
+        ? recipientList.filter(r => !r.zone || r.zone.toLowerCase() === target_zone.toLowerCase())
+        : recipientList;
+      if (zoneFiltered.length > 0) {
+        await sendBulkSMS(zoneFiltered, msgObj);
+      }
+    } catch (smsErr) {
+      console.error('[UACS MESSAGES] Emergency SMS dispatch error:', smsErr.message);
+    }
+
     // Mark active for instant dashboard update
     await dbUpdate('messages', newMsg.id, {
       status: 'active',

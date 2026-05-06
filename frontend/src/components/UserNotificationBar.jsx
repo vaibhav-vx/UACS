@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, ShieldAlert, CheckCircle2, ChevronRight, X, AlertTriangle, Globe } from 'lucide-react';
 import { messagesApi } from '../api';
 import { useLanguage } from '../i18n/LanguageContext';
+import CGACitizenPanel from './CGACitizenPanel';
 
 export default function UserNotificationBar({ user }) {
   const { t } = useLanguage();
@@ -10,6 +11,7 @@ export default function UserNotificationBar({ user }) {
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState('state'); // 'state' or 'india'
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [cgaMode, setCgaMode] = useState(false);
 
   const userZone = user?.zone || user?.location || 'General';
 
@@ -81,12 +83,27 @@ export default function UserNotificationBar({ user }) {
             <div>
               <div className="text-sm font-extrabold text-white flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-indigo-400" />
-                Latest Alerts & Notifications
+                {cgaMode ? 'CivicGuard AI Fact-Check' : 'Latest Alerts & Notifications'}
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Your regional safety command</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {cgaMode ? 'Verify suspicious rumors instantly' : 'Your regional safety command'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 ml-auto mr-4">
+              <button
+                type="button"
+                onClick={() => setCgaMode(!cgaMode)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  cgaMode 
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' 
+                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                }`}
+              >
+                {cgaMode ? '🔔 Show Alerts' : '🔍 Fact-Check'}
+              </button>
             </div>
             <button
-              onClick={() => { setOpen(false); setSelectedAlert(null); }}
+              onClick={() => { setOpen(false); setSelectedAlert(null); setCgaMode(false); }}
               className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-all"
             >
               <X className="w-5 h-5" />
@@ -94,7 +111,7 @@ export default function UserNotificationBar({ user }) {
           </div>
 
           {/* Scope Filters */}
-          {!selectedAlert && (
+          {!cgaMode && !selectedAlert && (
             <div className="p-3 bg-white/5 border-b border-white/5 flex gap-2">
               <button
                 onClick={() => setSelectedTab('state')}
@@ -123,7 +140,9 @@ export default function UserNotificationBar({ user }) {
 
           {/* Alert Content Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {selectedAlert ? (
+            {cgaMode ? (
+              <CGACitizenPanel onClose={() => { setOpen(false); setCgaMode(false); }} />
+            ) : selectedAlert ? (
               /* ── Detailed Disaster View ── */
               <div className="space-y-4 animate-fade-in">
                 <button

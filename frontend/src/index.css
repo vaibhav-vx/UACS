@@ -15,40 +15,40 @@
 
 /* Dark theme (default) */
 :root, .dark {
-  --bg-base: #000000;
-  --bg-surface: #0a0a0a;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --bg-card-solid: #0a0a0a;
-  --bg-hover: rgba(255, 255, 255, 0.06);
-  --bg-input: #0a0a0a;
-  --bg-selected: rgba(59, 130, 246, 0.15);
+  --bg-base: #111827;
+  --bg-surface: #1f2937;
+  --bg-card: #1f2937;
+  --bg-card-solid: #1f2937;
+  --bg-hover: #374151;
+  --bg-input: #374151;
+  --bg-selected: rgba(59, 130, 246, 0.1);
 
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-dim: #475569;
-  --text-inverse: #0f172a;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-dim: #4b5563;
+  --text-inverse: #111827;
 
-  --border: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.2);
-  --border-strong: rgba(255, 255, 255, 0.15);
+  --border: #374151;
+  --border-hover: #4b5563;
+  --border-strong: #4b5563;
 
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --accent-dark: #2563eb;
-  --accent-bg: rgba(59, 130, 246, 0.15);
-  --accent-border: rgba(59, 130, 246, 0.3);
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-dark: #1e40af;
+  --accent-bg: rgba(37, 99, 235, 0.1);
+  --accent-border: rgba(37, 99, 235, 0.3);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-  --card-blur: blur(12px);
+  --card-blur: none;
   --card-shadow: none;
 
-  --scrollbar-track: #000000;
-  --scrollbar-thumb: #333333;
-  --scrollbar-thumb-hover: #444444;
+  --scrollbar-track: #111827;
+  --scrollbar-thumb: #374151;
+  --scrollbar-thumb-hover: #4b5563;
 }
 
 /* Light theme */
@@ -109,6 +109,7 @@
 
   body {
     font-family: var(--font-sans);
+    line-height: 1.6;
     background-color: var(--bg-base);
     color: var(--text-primary);
     min-height: 100vh;
@@ -129,13 +130,12 @@
 /* ═══════════════════════════════════════════════════════ */
 
 @layer components {
-  /* ─── Glass / Surface card ─── */
+  /* ─── Solid / Surface card ─── */
   .glass-card {
     background: var(--bg-card);
-    backdrop-filter: var(--card-blur);
     border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    box-shadow: var(--card-shadow);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-sm);
   }
 
   /* ─── Urgency badges ─── */
@@ -152,9 +152,8 @@
   }
 
   .shimmer {
-    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-hover) 50%, var(--bg-surface) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    background: var(--bg-surface);
+    animation: pulse-fast 1.5s infinite;
   }
 
   /* ─── Buttons ─── */
@@ -254,14 +253,13 @@
   /* ─── Stat card ─── */
   .stat-card {
     background: var(--bg-card);
-    backdrop-filter: var(--card-blur);
     border: 1px solid var(--border);
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: var(--shadow-sm);
   }
 
   /* ─── Theme toggle button ─── */
@@ -518,7 +516,7 @@ p, span, h1, h2, h3, h4, h5, h6, div, td, th {
 }
 
 .cinematic-bg {
-  background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0f 100%);
+  background: var(--bg-base);
 }
 
 .typewriter-cursor::after {

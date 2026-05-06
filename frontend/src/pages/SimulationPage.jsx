@@ -27,7 +27,7 @@ export default function SimulationPage() {
         <div className="flex flex-col items-center justify-center text-center space-y-6 animate-fade-in">
           <div className="text-6xl font-black tracking-[0.2em] text-white opacity-20 mb-8">UACS</div>
           <h2 className="text-3xl font-light text-white/80 max-w-2xl leading-relaxed">
-            "Before we built this system... governments were failing their citizens during the most critical moments."
+            "Before UACS, manual communication systems caused critical delays during emergencies."
           </h2>
         </div>
       )
@@ -47,7 +47,7 @@ export default function SimulationPage() {
           <div className="space-y-4">
              <p className="text-2xl text-white/90 animate-slide-up" style={{ animationDelay: '0.5s' }}>A flood warning has been detected in Zone 4, Mumbai.</p>
              <p className="text-4xl font-black text-red-500 animate-slide-up" style={{ animationDelay: '1.5s' }}>3.2 MILLION CITIZENS</p>
-             <p className="text-xl text-white/60 animate-slide-up" style={{ animationDelay: '2.5s' }}>Need to be warned. RIGHT NOW.</p>
+             <p className="text-xl text-white/60 animate-slide-up" style={{ animationDelay: '2.5s' }}>Require immediate notification.</p>
           </div>
           <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
             {[...Array(20)].map((_, i) => (
@@ -138,7 +138,7 @@ export default function SimulationPage() {
               <div className="text-[10px] text-red-500 font-bold mb-1">STILL SHOWING AT 8PM:</div>
               <p className="text-sm font-bold italic">"Evacuate immediately"</p>
             </div>
-            <p className="text-white/60">The old alert was never retracted. Zero closure for the public.</p>
+            <p className="text-white/60">The previous alert was not retracted, causing confusion.</p>
           </div>
         </div>
       )
@@ -173,7 +173,7 @@ export default function SimulationPage() {
       duration: 8000,
       content: (
         <div className="w-full max-w-2xl mx-auto space-y-4">
-          <h2 className="text-4xl font-black text-red-600 mb-12 text-center">THE COST OF FAILURE</h2>
+          <h2 className="text-4xl font-black text-red-600 mb-12 text-center">SYSTEM INEFFICIENCIES</h2>
           <div className="space-y-4">
             <ResultRow label="Time to send first alert" value="47 Minutes" error delay="0s" />
             <ResultRow label="Message Consistency" value="23%" error delay="0.5s" />
@@ -182,7 +182,7 @@ export default function SimulationPage() {
             <ResultRow label="Alert Retraction" value="Never" error delay="2s" />
             <ResultRow label="Population Reach" value="60%" error delay="2.5s" />
           </div>
-          <div className="text-center pt-12 animate-glitch text-4xl font-black text-red-700">THIS IS THE PROBLEM.</div>
+          <div className="text-center pt-12 animate-glitch text-4xl font-black text-red-700">MANUAL PROCESS LIMITATIONS</div>
         </div>
       )
     },
@@ -195,8 +195,8 @@ export default function SimulationPage() {
       content: (
         <div className="flex flex-col items-center justify-center text-center space-y-6">
            <div className="text-6xl font-black text-white animate-assemble">UACS</div>
-           <div className="text-2xl text-white/60 animate-fade-in" style={{ animationDelay: '1.5s' }}>There is a better way.</div>
-           <div className="text-4xl font-black text-accent animate-fade-in" style={{ animationDelay: '2s' }}>Introducing UACS.</div>
+           <div className="text-2xl text-white/60 animate-fade-in" style={{ animationDelay: '1.5s' }}>Automated alert dispatch.</div>
+           <div className="text-4xl font-black text-accent animate-fade-in" style={{ animationDelay: '2s' }}>The UACS Solution.</div>
         </div>
       )
     },
@@ -214,7 +214,7 @@ export default function SimulationPage() {
           </div>
           <div className="space-y-4">
              <p className="text-2xl text-white/90">Same disaster. Zone 4. 3.2 million citizens.</p>
-             <p className="text-5xl font-black text-accent animate-assemble" style={{ animationDelay: '1s' }}>BUT THIS TIME...</p>
+             <p className="text-5xl font-black text-accent animate-assemble" style={{ animationDelay: '1s' }}>WITH UACS...</p>
           </div>
         </div>
       )
@@ -276,7 +276,7 @@ export default function SimulationPage() {
           </div>
           <div className="text-center mt-16 space-y-2">
              <div className="text-4xl font-black text-white">5 LANGUAGES. 3 SECONDS.</div>
-             <p className="text-accent font-bold">Zero manual translation.</p>
+             <p className="text-accent font-bold">Automated translation and formatting.</p>
           </div>
         </div>
       )
@@ -433,8 +433,8 @@ export default function SimulationPage() {
            </div>
 
            <div className="text-center pt-16 animate-fade-in" style={{ animationDelay: '2s' }}>
-              <p className="text-3xl font-light text-white/80">UACS doesn't just send messages faster.</p>
-              <p className="text-6xl font-black text-accent mt-4 animate-assemble">IT SAVES LIVES.</p>
+              <p className="text-3xl font-light text-white/80">Automated communication.</p>
+              <p className="text-6xl font-black text-accent mt-4 animate-assemble">FASTER RESPONSE.</p>
            </div>
         </div>
       )

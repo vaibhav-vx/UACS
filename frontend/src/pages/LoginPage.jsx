@@ -21,41 +21,7 @@ const REG_LANGUAGES = [
   { code: 'te', label: 'తెలుగు (Telugu)', flag: '🇮🇳' },
 ];
 
-// ── Animated background orbs ─────────────────────────────
-function BgOrbs() {
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-      <div style={{
-        position: 'absolute', top: '-30%', left: '-20%', width: '60%', height: '60%',
-        borderRadius: '50%', filter: 'blur(80px)',
-        background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)',
-        animation: 'float1 8s ease-in-out infinite',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '-20%', right: '-20%', width: '55%', height: '55%',
-        borderRadius: '50%', filter: 'blur(80px)',
-        background: 'radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)',
-        animation: 'float2 10s ease-in-out infinite',
-      }} />
-      <div style={{
-        position: 'absolute', top: '40%', right: '10%', width: '30%', height: '30%',
-        borderRadius: '50%', filter: 'blur(60px)',
-        background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)',
-        animation: 'float1 12s ease-in-out infinite reverse',
-      }} />
-      <style>{`
-        @keyframes float1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, 20px) scale(1.05); }
-        }
-        @keyframes float2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-25px, -15px) scale(1.04); }
-        }
-      `}</style>
-    </div>
-  );
-}
+// Removed Animated background orbs
 
 // ── Input field component ─────────────────────────────────
 function Field({ id, label, icon: Icon, type = 'text', value, onChange, placeholder, autoFocus, autoComplete, rightEl, hint }) {
@@ -279,7 +245,6 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, position: 'relative', background: 'var(--bg-base)' }}>
-      <BgOrbs />
 
       {/* Top-right: language + theme */}
       <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', alignItems: 'center', gap: 8, zIndex: 10 }}>
@@ -333,7 +298,7 @@ export default function LoginPage() {
             onClick={() => setCgaMode(v => !v)}
             style={{
               width: 52, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer',
-              background: cgaMode ? 'linear-gradient(135deg,#6366f1,#7c3aed)' : 'var(--bg-hover)',
+              background: cgaMode ? 'var(--accent)' : 'var(--bg-hover)',
               position: 'relative', transition: 'background 0.35s',
             }}
             aria-label="Switch between UACS and CivicGuard AI"
@@ -341,10 +306,10 @@ export default function LoginPage() {
             <span style={{
               position: 'absolute', top: 4, left: cgaMode ? 28 : 4,
               width: 20, height: 20, borderRadius: '50%', background: 'white',
-              transition: 'left 0.35s', boxShadow: '0 1px 4px rgba(0,0,0,0.35)',
+              transition: 'left 0.35s', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
             }} />
           </button>
-          <span style={{ fontSize: 12, fontWeight: 700, color: cgaMode ? '#818cf8' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: cgaMode ? 'var(--accent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5 }}>
             <Shield style={{ width: 12, height: 12 }} /> CivicGuard AI
           </span>
         </div>
@@ -354,23 +319,19 @@ export default function LoginPage() {
           <div style={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             width: 64, height: 64, borderRadius: 18, marginBottom: 16,
-            background: cgaMode
-              ? 'linear-gradient(135deg, #6366f1, #7c3aed)'
-              : 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-            boxShadow: cgaMode
-              ? '0 8px 32px rgba(99,102,241,0.4)'
-              : '0 8px 32px rgba(59,130,246,0.35)',
+            background: 'var(--accent)',
+            color: 'white',
             transition: 'all 0.4s ease',
           }}>
             {cgaMode
               ? <Shield style={{ width: 30, height: 30, color: 'white' }} />
               : <Lock style={{ width: 30, height: 30, color: 'white' }} />}
           </div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', margin: 0, transition: 'color 0.3s' }}>
+          <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0, transition: 'color 0.3s' }}>
             {cgaMode ? 'CivicGuard AI' : 'UACS Portal'}
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-            {cgaMode ? 'Misinformation Detection • Powered by UACS' : 'Unified Authority Communication System'}
+            {cgaMode ? 'Misinformation Detection' : 'Communication System'}
           </p>
         </div>
 

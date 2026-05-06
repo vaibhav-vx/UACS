@@ -57,22 +57,52 @@ export default function UserNotificationBar({ user }) {
           </span>
         </div>
 
-        {/* The Toggle Button named "Notify" */}
-        <button
-          onClick={() => setOpen(!open)}
-          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
-            open 
-              ? 'bg-indigo-600 text-white border border-indigo-500 shadow-indigo-600/30 hover:bg-indigo-700' 
-              : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10'
-          }`}
-          id="notify-toggle-btn"
-        >
-          <Bell className={`w-4 h-4 text-indigo-400 transition-all duration-300 ${open ? 'scale-110' : ''}`} />
-          <span>Notify</span>
-          {stateMessages.length > 0 && !open && (
-            <span className="w-2 h-2 bg-red-500 rounded-full animate-bounce" />
-          )}
-        </button>
+        {/* Switch buttons near Notify */}
+        <div className="flex items-center gap-2">
+          {/* The Toggle Button named "Notify" */}
+          <button
+            onClick={() => {
+              if (open && !cgaMode) {
+                setOpen(false);
+              } else {
+                setOpen(true);
+                setCgaMode(false);
+              }
+            }}
+            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
+              open && !cgaMode
+                ? 'bg-indigo-600 text-white border border-indigo-500 shadow-indigo-600/30 hover:bg-indigo-700' 
+                : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10'
+            }`}
+            id="notify-toggle-btn"
+          >
+            <Bell className={`w-4 h-4 text-indigo-400 transition-all duration-300 ${open && !cgaMode ? 'scale-110' : ''}`} />
+            <span>Notify</span>
+            {stateMessages.length > 0 && !open && (
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-bounce" />
+            )}
+          </button>
+
+          {/* The Switch Button for CivicGuard AI */}
+          <button
+            onClick={() => {
+              if (open && cgaMode) {
+                setOpen(false);
+              } else {
+                setOpen(true);
+                setCgaMode(true);
+              }
+            }}
+            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
+              open && cgaMode
+                ? 'bg-indigo-600 text-white border border-indigo-500 shadow-indigo-600/30 hover:bg-indigo-700' 
+                : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10'
+            }`}
+            id="cga-toggle-btn"
+          >
+            <span>CivicGuard AI</span>
+          </button>
+        </div>
       </div>
 
       {/* ── Notification & Alert Drawer Panel ── */}

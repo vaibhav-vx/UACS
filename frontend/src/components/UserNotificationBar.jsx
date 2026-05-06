@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Bell, ShieldAlert, CheckCircle2, ChevronRight, X, AlertTriangle, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { messagesApi } from '../api';
 import { useLanguage } from '../i18n/LanguageContext';
 import CGACitizenPanel from './CGACitizenPanel';
 
 export default function UserNotificationBar({ user }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -85,19 +87,8 @@ export default function UserNotificationBar({ user }) {
 
           {/* The Switch Button for CivicGuard AI */}
           <button
-            onClick={() => {
-              if (open && cgaMode) {
-                setOpen(false);
-              } else {
-                setOpen(true);
-                setCgaMode(true);
-              }
-            }}
-            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
-              open && cgaMode
-                ? 'bg-indigo-600 text-white border border-indigo-500 shadow-indigo-600/30 hover:bg-indigo-700' 
-                : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10'
-            }`}
+            onClick={() => navigate('/cga')}
+            className="flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10"
             id="cga-toggle-btn"
           >
             <span>CivicGuard AI</span>

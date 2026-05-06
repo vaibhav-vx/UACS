@@ -30,9 +30,11 @@ import SurvivalGuidePage from './pages/SurvivalGuidePage';
 import SOSResponsePage from './pages/SOSResponsePage';
 import UserNotificationBar from './components/UserNotificationBar';
 import CivicGuardAdminPage from './pages/CivicGuardAdminPage';
+import CivicGuardPage      from './pages/CivicGuardPage';
 
 const NAV_ITEMS = [
   { path: '/dashboard',  labelKey: 'dashboard',  icon: LayoutDashboard, roles: ['admin', 'user'] },
+  { path: '/cga',        labelKey: 'civicGuardAI', icon: Shield,           roles: ['user'] },
   { path: '/survival',   labelKey: 'survivalGuide', icon: BookOpen,        roles: ['user'] },
   { path: '/history',    labelKey: 'history',    icon: ScrollText,      roles: ['user'] },
   { path: '/evacuation', labelKey: 'evacuation', icon: MapIcon,            roles: ['user'] },
@@ -338,6 +340,7 @@ function AppLayout() {
             {user?.role?.toLowerCase() === 'user' && !isSimulation && <UserNotificationBar user={user} />}
             <Routes>
               <Route path="/dashboard"    element={<DashboardPage />} />
+              <Route path="/cga"          element={<CivicGuardPage />} />
               <Route path="/survival"     element={<SurvivalGuidePage />} />
               <Route path="/history"      element={<NotificationsPage />} />
               <Route path="/evacuation"   element={<EvacuationPage />} />

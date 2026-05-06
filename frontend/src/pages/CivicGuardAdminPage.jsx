@@ -110,10 +110,6 @@ export default function CivicGuardAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"
-            style={{ background: 'linear-gradient(135deg,#6366f1,#3b82f6)' }}>
-            <Shield className="w-6 h-6 text-white" />
-          </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight">CivicGuard AI</h1>
             <p className="text-sm text-theme-muted">Misinformation Intelligence Command Center</p>

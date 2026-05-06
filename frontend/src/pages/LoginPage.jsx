@@ -301,7 +301,6 @@ export default function LoginPage() {
               borderColor: !cgaMode ? 'var(--accent)' : 'var(--border)'
             }}
           >
-            <Shield style={{ width: 24, height: 24 }} />
             <span style={{ fontWeight: 700, fontSize: 14 }}>UACS Portal</span>
           </button>
           <button
@@ -316,7 +315,6 @@ export default function LoginPage() {
               borderColor: cgaMode ? 'var(--accent)' : 'var(--border)'
             }}
           >
-            <AlertCircle style={{ width: 24, height: 24 }} />
             <span style={{ fontWeight: 700, fontSize: 14 }}>CivicGuard AI</span>
           </button>
         </div>

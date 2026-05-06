@@ -219,17 +219,9 @@ export default function CGACitizenPanel({ onClose }) {
       {/* Header */}
       <div style={{
         padding: '14px 16px', borderBottom: '1px solid var(--border)',
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(59,130,246,0.05))',
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 10,
-            background: 'linear-gradient(135deg, #6366f1, #3b82f6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Shield style={{ width: 16, height: 16, color: 'white' }} />
-          </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em' }}>CivicGuard AI</div>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>Misinformation Detector • UACS</div>

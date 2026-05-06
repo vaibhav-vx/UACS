@@ -6,8 +6,10 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { dbGetOne, dbUpdate, dbInsert, dbSelect } from '../database/db.js';
+import { v4 as uuidv4 } from 'uuid';
+import { dbGetOne, dbUpdate, dbInsert, dbSelect, getSupabase } from '../database/db.js';
 import { detectZone, detectZoneFromLocation } from '../utils/zoneMapper.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -80,7 +82,7 @@ router.post('/login', async (req, res) => {
     await dbUpdate('users', user.id, { last_login: new Date().toISOString() });
 
     const token = jwt.sign(
-      { id: user.id, phone: user.email, role: user.role },
+      { id: user.id, phone: user.email, role: user.role, jti: uuidv4() },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
@@ -109,9 +111,26 @@ router.post('/login', async (req, res) => {
 });
 
 // ─── POST /api/auth/logout ─────────────────────────────
-router.post('/logout', (req, res) => {
-  console.log('[UACS AUTH] User logged out');
-  res.json({ success: true, message: 'Logged out successfully' });
+router.post('/logout', authenticate, async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.decode(token);
+      if (decoded && decoded.jti && decoded.exp) {
+        const sb = getSupabase();
+        await sb.from('token_blocklist').insert({
+          jti: decoded.jti,
+          expires_at: new Date(decoded.exp * 1000).toISOString()
+        });
+      }
+    }
+    console.log(`[UACS AUTH] User ${req.user?.name || 'Unknown'} logged out (token revoked)`);
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('[UACS AUTH] Logout error:', err.message);
+    res.status(500).json({ error: 'Server error during logout' });
+  }
 });
 
 // ─── POST /api/auth/demo ───────────────────────────────
@@ -138,7 +157,7 @@ router.post('/demo', async (req, res) => {
     const detected = detectZone(demoUser.location, demoUser.lat, demoUser.lng);
 
     const token = jwt.sign(
-      { id: demoUser.id, phone: demoUser.email, role: demoUser.role },
+      { id: demoUser.id, phone: demoUser.email, role: demoUser.role, jti: uuidv4() },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
@@ -261,7 +280,7 @@ router.post('/register', async (req, res) => {
 
     // Sign JWT
     const token = jwt.sign(
-      { id: newUser.id, phone: newUser.email, role: newUser.role },
+      { id: newUser.id, phone: newUser.email, role: newUser.role, jti: uuidv4() },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );

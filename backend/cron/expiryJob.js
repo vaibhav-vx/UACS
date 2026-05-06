@@ -45,6 +45,16 @@ async function processExpiredMessages() {
         notes:        noteMap[msg.expiry_action] || noteMap.flag,
       });
     }
+
+    // --- Clean up expired tokens from blocklist ---
+    const { error: blocklistError } = await sb
+      .from('token_blocklist')
+      .delete()
+      .lte('expires_at', now);
+      
+    if (blocklistError) {
+      console.error('[UACS EXPIRY] Error cleaning blocklist:', blocklistError.message);
+    }
   } catch (err) {
     console.error('[UACS EXPIRY] Error:', err.message);
   }

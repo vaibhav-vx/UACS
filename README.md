@@ -1,103 +1,132 @@
 # 🚨 Unified Authority Communication System (UACS)
 
-![UACS Header](https://img.shields.io/badge/UACS-Emergency_Command_Center-3b82f6?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Live_Production-22c55e?style=for-the-badge)
-![Security](https://img.shields.io/badge/Security-JWT_RBAC-eb4034?style=for-the-badge)
-![Architecture](https://img.shields.io/badge/Architecture-Dual_Portal_Loop-purple?style=for-the-badge)
-![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
-![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+<div align="center">
+  <img src="https://img.shields.io/badge/UACS-Emergency_Command_Center-3b82f6?style=for-the-badge" alt="UACS Header" />
+  <img src="https://img.shields.io/badge/Status-Live_Production-22c55e?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/Security-JWT_RBAC-eb4034?style=for-the-badge" alt="Security" />
+  <img src="https://img.shields.io/badge/Architecture-Dual_Portal_Loop-purple?style=for-the-badge" alt="Architecture" />
+</div>
+<br/>
+<div align="center">
+  <img src="https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
+</div>
 
-The **Unified Authority Communication System (UACS)** is a mission-critical, enterprise-grade emergency communication platform. It bridges the gap between administrative authorities and citizens during disasters. Developed as a **High-Stakes Command & Control Center**, UACS unifies multi-channel alert dispatching, real-time GIS situational awareness, and automated citizen safety coordination.
+<br />
+
+> **The Unified Authority Communication System (UACS)** is a mission-critical, enterprise-grade emergency communication platform. It bridges the gap between administrative authorities and citizens during disasters. Developed as a High-Stakes Command & Control Center, UACS unifies multi-channel alert dispatching, real-time GIS situational awareness, and automated citizen safety coordination.
 
 ---
 
 ## 💡 The Innovation: "Closing the Rescue Loop"
+
 Traditional emergency broadcasting systems are fundamentally one-way (Authority ➔ Citizen). **UACS introduces a closed, two-way loop:**
-1. **Admin Dispatches**: One critical message is sent across 5 languages and 5 channels instantly.
-2. **Citizen Responds**: Citizens receive the alert and can confirm safety or request help (with live GPS).
-3. **Authority Acts**: The SOS Response Center triages distress signals, alerts rescue teams, and **notifies the citizen** that help is en route via Twilio SMS.
-4. **Accountability**: Every expired alert requires a "Reason for Closure," which is shown back to the citizen—creating total transparency.
+
+1. **Admin Dispatches**: One critical message is sent across multiple languages and channels (SMS, Social Media, etc.) instantly.
+2. **Citizen Responds**: Citizens receive the alert and can confirm safety or request help (with live GPS coordinates).
+3. **Authority Acts**: The SOS Response Center triages distress signals, alerts rescue teams, and **notifies the citizen** that help is en route via SMS.
+4. **Accountability**: Every expired alert requires a "Reason for Closure," creating total transparency.
 
 ---
 
-## 🏗️ Dual-Portal Architecture
+## 🏗️ Core Architecture & Features
+
+The project is built on a **Dual-Portal Architecture** serving both the general public and administrative authorities.
 
 ### 🔒 Unified Authentication Gateway
-- **Official Government Identity:** Features clear `🇮🇳 Government of India • Secure Communication Portal • v1.0` branding to maintain trust.
-- **Dual-Tab Auth:** Glassmorphic centered interface featuring simple mobile-number based logins and registrations.
-- **Accessibility First:** Integrated light/dark theme toggle and global language switcher accessible right from the login screen.
+- **Official Government Identity:** Features clear branding to maintain trust.
+- **Role-Based Access Control (RBAC):** Distinct roles for Citizens, Admins, and Field Ops.
+- **Accessibility:** Global language switcher and light/dark theme toggle accessible from login.
 
 ### 🏛️ Admin Command Suite (Portal 1)
-- **Live Dashboard:** Clean sidebar navigation with quick access to *Live Simulation, Templates, Compose, Approval, and Recipients*. Features a "Safety Response Analytics" board tracking live "Marked Safe" vs "Need Assistance" metrics.
-- **Interactive Situation Map:** A full-scale Leaflet map visualizing alerts across the country. Includes a detailed legend distinguishing between *Critical Alerts, High Alerts, Safety Points, and NASA Global Events* alongside heatmaps.
-- **SOS Response Center:** A real-time emergency coordination queue tracking Priority 1 distress signals. Features actionable cards with "Mark Assisted" buttons and tracks whether Emergency Contacts have been successfully notified via Twilio.
-- **Precision Composer:** Multi-language (i18next) broadcasting to SMS, Social Media, Radio, and TV from a single interface.
-- **Audit Logging:** Immutable timeline of the message lifecycle.
+Designed for crisis managers and operators to maintain control during emergencies.
+- **Dashboard (`DashboardPage`):** Live metrics, active alerts, and "Safety Response Analytics" tracking live "Marked Safe" vs "Need Assistance".
+- **Composer & Dispatch (`ComposerPage`):** Multi-channel, multi-language broadcasting interface.
+- **Approvals (`ApprovalPage`):** Hierarchical approval workflow before alerts go live.
+- **Auditing (`AuditLogPage`):** Immutable timeline of the message lifecycle and system events.
+- **Templates & Recipients (`TemplatesPage`, `RecipientsPage`):** Target audience management and quick-launch templates.
+- **SOS Response (`SOSResponsePage`):** A real-time emergency coordination queue tracking Priority 1 distress signals.
+- **Live Simulation (`SimulationPage`):** Tools for running drills and testing workflows.
 
 ### 👥 Citizen Safety Portal (Portal 2)
-- **Emergency Command Center:** Clean UI with an integrated Theme Toggle (Light/Dark mode) featuring soft blue radial glows and glassmorphic card effects.
-- **SOS Panic Button 2.0:** "Hold-to-confirm" logic to prevent false positives, tightly integrated with geolocation.
-- **National Survival Guide:** Interactive, offline-ready disaster protocols (Earthquakes, Floods, Fire).
-- **Evacuation Maps:** Real-time routing to nearest Emergency Assembly Points (EAPs).
+Focused on rapid action, safety protocols, and real-time situational awareness.
+- **Live Situation Map (`MapPage`):** A full-scale Leaflet map visualizing alerts across the country, showing safety points and active zones.
+- **SOS Panic Button:** "Hold-to-confirm" logic to prevent false positives, tightly integrated with geolocation.
+- **Evacuation Routing (`EvacuationPage`):** Real-time routing to nearest Emergency Assembly Points (EAPs).
+- **Survival Guide (`SurvivalGuidePage`):** Interactive, offline-ready disaster protocols.
+- **Family Coordination (`FamilyPage`):** Keep track of emergency contacts and loved ones.
+- **Notifications (`NotificationsPage`):** Centralized feed of all relevant active alerts.
 
 ---
 
 ## 🛠️ Technical Stack
 
-### Frontend Architecture
+### Frontend (React + Vite)
 - **Framework:** React 19 + Vite
-- **Styling:** Tailwind CSS v4 + Glassmorphism aesthetic
-- **Routing:** React Router DOM (v7)
+- **Routing:** React Router DOM v7
+- **Styling:** Tailwind CSS v4 + custom Glassmorphism aesthetic
 - **Maps:** Leaflet & React-Leaflet
 - **i18n:** React-i18next (English, Hindi, Marathi, Tamil, Telugu)
 - **Icons:** Lucide-React
 
-### Backend Architecture
-- **Runtime:** Node.js (v18+) + Express.js
-- **Authentication:** JWT (JSON Web Tokens) with Bcrypt password hashing
-- **Database:** Supabase (PostgreSQL) with `supabase-js`
-- **Cron Jobs:** Node-Cron for message expiry actions
-- **Integrations:** Twilio SMS APIs & Webhooks
+### Backend (Node.js + Express)
+- **Runtime:** Node.js (v18+)
+- **API Architecture:** RESTful Endpoints (`routes/` module)
+- **Authentication:** JWT with Bcrypt hashing
+- **Database Integration:** Supabase (PostgreSQL) via `supabase-js`
+- **Cron Jobs:** Node-Cron for scheduled events (e.g., message expiry)
+- **3rd-Party Integrations:** Twilio (SMS & Webhooks), Translation Services
 
 ---
 
-## 🗄️ Database Schema (Supabase)
+## 🗄️ Database Schema & API Services
 
-UACS utilizes a robust, relational PostgreSQL schema managed via Supabase:
-1. **`users`**: RBAC accounts (Admin/Field Ops/User) with GPS zones and departments.
-2. **`messages`**: Core alert payloads containing multi-lingual content, target radius, and expiry lifecycles.
-3. **`recipients`**: Target population data.
-4. **`safety_reports`**: Live distress signals (Safe vs. Assistance Needed) mapped to specific active messages.
+### PostgreSQL (Supabase)
+1. **`users`**: RBAC accounts with GPS zones and departments.
+2. **`messages`**: Core alert payloads, translation details, targeting radius, and lifecycle states.
+3. **`recipients`**: Target population demographic data.
+4. **`safety_reports`**: Live distress signals mapped to active messages.
 5. **`audit_log`**: Immutable trail of every system action.
 
+### Core Backend Routes
+- `/api/auth/*` - Login, registration, token refresh.
+- `/api/messages/*` - Alert CRUD, fetching active/expired alerts.
+- `/api/dispatch/*` - Multi-channel sending logic.
+- `/api/recipients/*` - Target audience query and management.
+- `/api/audit/*` - Fetching system logs.
+- `/api/webhooks/*` - Handling inbound events from Twilio and other providers.
+- `/api/translate/*` - Internal routing to translation AI/services.
+
 ---
 
-## 📂 Project Structure
+## 📂 Comprehensive Project Structure
 
 ```text
 uacs-project/
 ├── backend/
-│   ├── cron/              # Automated tasks (e.g., expiryJob.js)
-│   ├── database/          # Supabase SQL schemas and db clients
+│   ├── cron/              # Automated tasks (expiryJob.js)
+│   ├── database/          # Supabase SQL schemas and clients
 │   ├── middleware/        # JWT Authentication checks
-│   ├── routes/            # API Endpoints (auth, messages, dispatch, audit)
+│   ├── routes/            # Core API Endpoints (auth, dispatch, audit, etc.)
 │   ├── scripts/           # DB Provisioning (provision_admin.js)
+│   ├── utils/             # Helper functions
 │   └── server.js          # Express Entry Point
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/    # Reusable UI (AlertBanners, Maps, ChannelCards)
+│   │   ├── components/    # Reusable UI (AlertBanner, SituationMapCard, etc.)
 │   │   ├── context/       # Theme and Global State Contexts
 │   │   ├── i18n/          # Translation dictionaries
-│   │   ├── pages/         # Dashboard, SOS Response, Composer, Auth Pages
+│   │   ├── pages/         # 17+ Modular UI Pages (Dashboard, SOS, Evacuation, etc.)
 │   │   └── utils/         # Helpers & constants
 │   ├── index.html         # Vite HTML entry
 │   └── vite.config.js     # Bundler configuration
 │
-└── vercel.json            # Vercel deployment & rewriting configuration
+├── .env.example           # Reference for environment variables
+└── vercel.json            # Vercel deployment configuration
 ```
 
 ---
@@ -110,7 +139,7 @@ uacs-project/
 - **Twilio**: Account SID, Auth Token, and a Phone Number
 
 ### 2. Environment Configuration
-Create a `.env` file in the root of your project:
+Create a `.env` file in the root of your project using `.env.example` as a template:
 ```env
 # Backend / DB Settings
 SUPABASE_URL=your_supabase_project_url
@@ -121,11 +150,20 @@ JWT_SECRET=your_super_secret_jwt_string
 TWILIO_ACCOUNT_SID=your_account_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_PHONE_NUMBER=your_twilio_number
+
+# Frontend (If any public variables are needed)
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
-### 3. Installation & Running Locally
+### 3. Database Setup
+Navigate to the `backend/database/supabase_schema.sql` file (or similar SQL schema file). Execute this script inside your Supabase SQL Editor to instantly provision all tables, policies, constraints, and default admin users.
 
-The project is structured in a monorepo-style setup.
+You can also run the provisioning script:
+```bash
+node backend/scripts/provision_admin.js
+```
+
+### 4. Running Locally (Monorepo)
 
 **Start the Backend:**
 ```bash
@@ -143,14 +181,23 @@ npm run dev
 ```
 *(Runs on Vite's default dev port, proxying to backend)*
 
-### 4. Database Setup
-Navigate to the `backend/database/supabase_schema.sql` file. Execute this script inside your Supabase SQL Editor to instantly provision all tables, policies, constraints, and default admin users.
-
 ---
 
 ## 🌐 Deployment
 
 The repository is configured for immediate deployment on **Vercel** via the included `vercel.json`. It maps frontend routes correctly and proxies `/api/*` endpoints to the `backend/server.js` serverless function.
+
+---
+
+## 🤝 Contributing
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 

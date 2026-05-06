@@ -5,9 +5,9 @@ let content = fs.readFileSync(FILE_PATH, 'utf8');
 
 // Convert to CJS
 const cjsContent = content.replace('export default translations;', 'module.exports = translations;');
-fs.writeFileSync('./temp_trans.cjs', cjsContent);
+fs.writeFileSync('./scripts/temp_trans.cjs', cjsContent);
 
-import ts from './temp_trans.cjs';
+const { default: ts } = await import('./temp_trans.cjs');
 
 // New keys to add
 const newKeys = {
@@ -211,5 +211,5 @@ delete ts.bn;
 const updatedContent = `const translations = ${JSON.stringify(ts, null, 2)};\n\nexport default translations;`;
 fs.writeFileSync(FILE_PATH, updatedContent);
 
-fs.unlinkSync('./temp_trans.cjs');
+fs.unlinkSync('./scripts/temp_trans.cjs');
 console.log('Translations updated successfully');

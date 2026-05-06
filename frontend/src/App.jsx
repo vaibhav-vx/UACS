@@ -5,7 +5,8 @@ import {
   LayoutDashboard, PenSquare, CheckCircle2, ScrollText, LogOut,
   Menu, X, Sun, Moon, Globe, ChevronDown, Users, BookTemplate, Map as MapIcon, Play,
   Zap,
-  BookOpen
+  BookOpen,
+  Shield
 } from 'lucide-react';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
@@ -28,6 +29,7 @@ import SettingsPage   from './pages/SettingsPage';
 import SurvivalGuidePage from './pages/SurvivalGuidePage';
 import SOSResponsePage from './pages/SOSResponsePage';
 import UserNotificationBar from './components/UserNotificationBar';
+import CivicGuardAdminPage from './pages/CivicGuardAdminPage';
 
 const NAV_ITEMS = [
   { path: '/dashboard',  labelKey: 'dashboard',  icon: LayoutDashboard, roles: ['admin', 'user'] },
@@ -45,7 +47,8 @@ const NAV_ITEMS = [
   { path: '/approval',   labelKey: 'approval',    icon: CheckCircle2,    roles: ['admin'] },
   { path: '/recipients', labelKey: 'recipients',  icon: Users,           roles: ['admin'] },
   { path: '/audit',      labelKey: 'auditLog',    icon: ScrollText,      roles: ['admin'] },
-  { path: '/sos-center', labelKey: 'sosCenter',   icon: Zap,           roles: ['admin'] },
+  { path: '/sos-center', labelKey: 'sosCenter',   icon: Zap,    roles: ['admin'] },
+  { path: '/admin/cga',  labelKey: 'civicGuardAI', icon: Shield, roles: ['admin'] },
 ];
 
 /* ── Language Switcher ─────────────────────────────── */
@@ -364,6 +367,7 @@ function AppLayout() {
               <Route path="/audit"        element={user?.role?.toLowerCase() === 'admin' ? <AuditLogPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/admin/simulation" element={user?.role?.toLowerCase() === 'admin' ? <SimulationPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/sos-center" element={user?.role?.toLowerCase() === 'admin' ? <SOSResponsePage /> : <Navigate to="/dashboard" replace />} />
+              <Route path="/admin/cga"  element={user?.role?.toLowerCase() === 'admin' ? <CivicGuardAdminPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/profile"      element={<ProfilePage />} />
               <Route path="/map"          element={user?.role?.toLowerCase() === 'user' ? <MapPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="*"             element={<Navigate to="/dashboard" replace />} />

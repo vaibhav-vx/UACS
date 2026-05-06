@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Lock, Mail, Eye, EyeOff, Loader2, AlertCircle, Sun, Moon, Globe, ChevronDown, 
   User, Map as MapIcon, UserPlus, LogIn, CheckCircle2, ArrowRight, Smartphone, ScrollText, 
-  KeyRound, MapPin, Languages
+  KeyRound, MapPin, Languages, Shield
 } from 'lucide-react';
 import { authApi } from '../api';
 import { useTheme } from '../ThemeContext';
@@ -116,6 +116,7 @@ function PasswordStrength({ password }) {
 // ── Main Page ─────────────────────────────────────────────
 export default function LoginPage() {
   const [tab, setTab] = useState('login');   // 'login' | 'register'
+  const [cgaMode, setCgaMode] = useState(false); // UACS vs CivicGuard AI branding
 
   // Login state
   const [loginPhone, setLoginPhone]       = useState('');
@@ -321,21 +322,55 @@ export default function LoginPage() {
       {/* Card */}
       <div className="animate-fade-in" style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
 
+        {/* Mode Toggle */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 24,
+          padding: '10px 20px', borderRadius: 999,
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: !cgaMode ? 'var(--accent)' : 'var(--text-muted)' }}>⚡ UACS</span>
+          <button
+            onClick={() => setCgaMode(v => !v)}
+            style={{
+              width: 52, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer',
+              background: cgaMode ? 'linear-gradient(135deg,#6366f1,#7c3aed)' : 'var(--bg-hover)',
+              position: 'relative', transition: 'background 0.35s',
+            }}
+            aria-label="Switch between UACS and CivicGuard AI"
+          >
+            <span style={{
+              position: 'absolute', top: 4, left: cgaMode ? 28 : 4,
+              width: 20, height: 20, borderRadius: '50%', background: 'white',
+              transition: 'left 0.35s', boxShadow: '0 1px 4px rgba(0,0,0,0.35)',
+            }} />
+          </button>
+          <span style={{ fontSize: 12, fontWeight: 700, color: cgaMode ? '#818cf8' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Shield style={{ width: 12, height: 12 }} /> CivicGuard AI
+          </span>
+        </div>
+
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             width: 64, height: 64, borderRadius: 18, marginBottom: 16,
-            background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-            boxShadow: '0 8px 32px rgba(59,130,246,0.35)',
+            background: cgaMode
+              ? 'linear-gradient(135deg, #6366f1, #7c3aed)'
+              : 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+            boxShadow: cgaMode
+              ? '0 8px 32px rgba(99,102,241,0.4)'
+              : '0 8px 32px rgba(59,130,246,0.35)',
+            transition: 'all 0.4s ease',
           }}>
-            <Lock style={{ width: 30, height: 30, color: 'white' }} />
+            {cgaMode
+              ? <Shield style={{ width: 30, height: 30, color: 'white' }} />
+              : <Lock style={{ width: 30, height: 30, color: 'white' }} />}
           </div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', margin: 0 }}>
-            UACS Portal
+          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', margin: 0, transition: 'color 0.3s' }}>
+            {cgaMode ? 'CivicGuard AI' : 'UACS Portal'}
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-            Unified Authority Communication System
+            {cgaMode ? 'Misinformation Detection • Powered by UACS' : 'Unified Authority Communication System'}
           </p>
         </div>
 

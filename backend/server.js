@@ -22,6 +22,7 @@ import dispatchRouter   from './routes/dispatch.js';
 import auditRouter      from './routes/audit.js';
 import recipientsRouter from './routes/recipients.js';
 import webhooksRouter   from './routes/webhooks.js';
+import cgaRouter        from './routes/cga.js';
 
 // Middleware
 import { authenticate } from './middleware/auth.js';
@@ -64,6 +65,7 @@ app.use('/api/translate',  authenticate, translateRouter);
 app.use('/api/dispatch',   authenticate, dispatchRouter);
 app.use('/api/audit',      authenticate, auditRouter);
 app.use('/api/recipients', authenticate, recipientsRouter);
+app.use('/api/cga',        authenticate, cgaRouter);
 
 // ─── Users list ──────────────────────────────────────────
 app.get('/api/users', authenticate, async (req, res) => {

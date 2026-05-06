@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { 
   History, Search, Filter, Calendar, Clock, ArrowRight, 
   CheckCircle, AlertTriangle, Info, Eye, Download, FileText,
-  ChevronRight
+  ChevronRight, Shield
 } from 'lucide-react';
 import { messagesApi } from '../api';
 import AlertBanner from '../components/AlertBanner';
 import toast from 'react-hot-toast';
+import CGACitizenPanel from '../components/CGACitizenPanel';
 
 export default function NotificationsPage() {
   const [alerts, setAlerts] = useState([]);
@@ -14,6 +15,7 @@ export default function NotificationsPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // all, critical, active, expired
   const [expandedId, setExpandedId] = useState(null);
+  const [cgaMode, setCgaMode] = useState(false);
 
 
   useEffect(() => {
@@ -52,19 +54,52 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20 animate-fade-in">
-      {/* Header & Search */}
+      {/* Header & CGA Toggle */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black flex items-center gap-3">
-            <History className="w-7 h-7 text-accent" />
-            Alert History & Notifications
+            {cgaMode
+              ? <Shield className="w-7 h-7" style={{ color: '#6366f1' }} />
+              : <History className="w-7 h-7 text-accent" />}
+            {cgaMode ? 'CivicGuard AI' : 'Alert History & Notifications'}
           </h1>
-          <p className="text-sm text-theme-muted">Track all received emergency communications and your responses.</p>
+          <p className="text-sm text-theme-muted">
+            {cgaMode ? 'Fact-check suspicious messages & rumours instantly.' : 'Track all received emergency communications and your responses.'}
+          </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-theme-hover rounded-xl text-xs font-bold hover:bg-accent hover:text-white transition-all shadow-lg">
-          <Download className="w-4 h-4" /> EXPORT PDF
-        </button>
+        {/* Toggle Switch */}
+        <div className="flex items-center gap-3 glass-card px-4 py-2.5 rounded-2xl border-0 shadow-lg">
+          <span className={`text-xs font-bold transition-colors ${!cgaMode ? 'text-accent' : 'text-theme-muted'}`}>🔔 Notifications</span>
+          <button
+            onClick={() => setCgaMode(v => !v)}
+            style={{
+              width: 48, height: 26, borderRadius: 999, cursor: 'pointer', border: 'none',
+              background: cgaMode ? 'linear-gradient(135deg,#6366f1,#3b82f6)' : 'var(--bg-hover)',
+              position: 'relative', transition: 'background 0.3s', flexShrink: 0,
+            }}
+            aria-label="Toggle CivicGuard AI mode"
+          >
+            <span style={{
+              position: 'absolute', top: 3, left: cgaMode ? 26 : 3,
+              width: 20, height: 20, borderRadius: '50%', background: 'white',
+              transition: 'left 0.3s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+            }} />
+          </button>
+          <span className={`text-xs font-bold transition-colors flex items-center gap-1 ${cgaMode ? 'text-indigo-400' : 'text-theme-muted'}`}>
+            <Shield className="w-3 h-3" /> CivicGuard AI
+          </span>
+        </div>
       </div>
+
+      {/* CGA Panel — full slide-in */}
+      {cgaMode && (
+        <div className="glass-card rounded-3xl overflow-hidden border-0 shadow-2xl animate-fade-in" style={{ minHeight: 520 }}>
+          <CGACitizenPanel onClose={() => setCgaMode(false)} />
+        </div>
+      )}
+
+      {cgaMode && null /* hide rest of content when CGA active */}
+      {cgaMode ? null : <>
 
       {/* Filters Bar */}
       <div className="glass-card p-2 rounded-2xl flex flex-wrap items-center gap-2 border-theme-border shadow-sm">
@@ -197,6 +232,8 @@ export default function NotificationsPage() {
           ))}
         </div>
       )}
+    </>
+    }
     </div>
   );
 }

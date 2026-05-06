@@ -15,9 +15,14 @@ async function addVaiUser() {
   console.log('[UACS] Starting creation of user Vai...');
 
   const name = 'Vai';
-  const phone = '8169825915';
+  const phone = process.env.VAI_PHONE;
   const location = 'Mumbai';
-  const password = 'vaibhav-hx';
+  const password = process.env.VAI_PASSWORD;
+
+  if (!phone || !password) {
+    console.error('[UACS] ❌ Error: VAI_PHONE and VAI_PASSWORD must be set in .env');
+    process.exit(1);
+  }
 
   // Normalize
   const normalizedPhone = phone.trim().replace(/\s+/g, '');

@@ -26,6 +26,10 @@ import cgaRouter        from './routes/cga.js';
 
 // Middleware
 import { authenticate } from './middleware/auth.js';
+import {
+  helmetConfig, apiLimiter, authLimiter, otpLimiter,
+  dispatchLimiter, cgaLimiter, sanitizeBody,
+} from './middleware/security.js';
 
 // Database
 import { getSupabase, dbSelect } from './database/db.js';
@@ -46,10 +50,18 @@ app.use(cors({
   },
   credentials: true,
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(helmetConfig);
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(sanitizeBody());           // strip null-bytes & trim all string fields
+app.use(apiLimiter);               // 120 req/min global ceiling
 
 // ─── Public routes ───────────────────────────────────────
+// Auth: strict rate-limit (5 attempts / 15 min), OTP has its own tighter limit
+app.use('/api/auth/login',    authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/demo',     authLimiter);
+app.use('/api/auth/otp',      otpLimiter);
 app.use('/api/auth', authRouter);
 
 app.get('/api/health', (req, res) => {
@@ -62,9 +74,10 @@ app.use('/api/webhooks', webhooksRouter);
 // ─── Protected routes ────────────────────────────────────
 app.use('/api/messages',   authenticate, messagesRouter);
 app.use('/api/translate',  authenticate, translateRouter);
-app.use('/api/dispatch',   authenticate, dispatchRouter);
+app.use('/api/dispatch',   authenticate, dispatchLimiter, dispatchRouter);
 app.use('/api/audit',      authenticate, auditRouter);
 app.use('/api/recipients', authenticate, recipientsRouter);
+app.use('/api/cga/verify', cgaLimiter);    // extra CGA verify limiter before auth
 app.use('/api/cga',        authenticate, cgaRouter);
 
 // ─── Users list ──────────────────────────────────────────
@@ -79,7 +92,12 @@ app.get('/api/users', authenticate, async (req, res) => {
 
 // ─── Boot ────────────────────────────────────────────────
 async function boot() {
-  // Verify Supabase connection on startup
+  // CRITICAL: JWT_SECRET must be set — refuse to start with the insecure default
+  const JWT_SECRET = process.env.JWT_SECRET;
+  if (!JWT_SECRET || JWT_SECRET.length < 32) {
+    console.error('[UACS] ❌ FATAL: JWT_SECRET is missing or too short (must be ≥ 32 chars). Set it in .env');
+    process.exit(1);
+  }
   try {
     getSupabase(); // will throw if creds are missing
     console.log('[UACS] ✅ Supabase connection verified');

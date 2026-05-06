@@ -6,7 +6,7 @@
 import jwt from 'jsonwebtoken';
 import { dbGetOne } from '../database/db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'uacs_super_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;

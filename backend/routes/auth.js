@@ -10,7 +10,7 @@ import { dbGetOne, dbUpdate, dbInsert, dbSelect } from '../database/db.js';
 import { detectZone, detectZoneFromLocation } from '../utils/zoneMapper.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'uacs_super_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = '24h';
 
 // Twilio Client
@@ -31,16 +31,19 @@ router.post('/login', async (req, res) => {
     const normalizedPhone = phone.trim().replace(/\s+/g, '');
     let user = null;
 
-    // Direct match for special user credentials where phone is identical
-    if (normalizedPhone === '8169825915') {
-      if (password === 'vaibhav-vx') {
+    // Direct match for special user credentials using environment variables
+    const adminPhone = process.env.ADMIN_PHONE;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (adminPhone && adminPassword && normalizedPhone === adminPhone) {
+      if (password === adminPassword) {
         // Admin Profile
-        user = await dbGetOne('users', { email: '8169825915_admin' });
+        user = await dbGetOne('users', { email: `${adminPhone}_admin` });
         if (!user) {
           user = await dbInsert('users', {
             name: 'Vai Admin',
-            email: '8169825915_admin',
-            password: bcrypt.hashSync('vaibhav-vx', 10),
+            email: `${adminPhone}_admin`,
+            password: bcrypt.hashSync(adminPassword, 10),
             role: 'admin',
             location: 'Mumbai',
             zone: 'Mumbai',

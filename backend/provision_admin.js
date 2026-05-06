@@ -9,13 +9,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-const MASTER_PHONE = '8169825915';
-const MASTER_PASS  = 'vaibhav-vx';
+const MASTER_PHONE = process.env.ADMIN_PHONE;
+const MASTER_PASS  = process.env.ADMIN_PASSWORD;
 
 async function run() {
   try {
     const sb = getSupabase();
     console.log('[PROVISION] Starting master admin setup...');
+
+    if (!MASTER_PHONE || !MASTER_PASS) {
+      console.error('[PROVISION] ❌ Error: ADMIN_PHONE and ADMIN_PASSWORD must be set in .env');
+      process.exit(1);
+    }
 
     // 1. Hash master password
     const hash = bcrypt.hashSync(MASTER_PASS, 10);

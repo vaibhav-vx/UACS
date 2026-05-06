@@ -162,7 +162,6 @@ function AppLayout() {
       >
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <Zap style={{ width: '22px', height: '22px', color: 'var(--accent)', flexShrink: 0 }} />
           <span style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.02em' }}>UACS</span>
         </div>
 
@@ -221,20 +220,6 @@ function AppLayout() {
           >
             {/* Logo block */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Zap style={{ width: '18px', height: '18px', color: 'white' }} />
-              </div>
               <div style={{ minWidth: 0, overflow: 'hidden' }}>
                 <div style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>UACS</div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

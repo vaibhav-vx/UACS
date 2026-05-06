@@ -287,52 +287,38 @@ export default function LoginPage() {
       {/* Card */}
       <div className="animate-fade-in" style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
 
-        {/* Mode Toggle */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 24,
-          padding: '10px 20px', borderRadius: 999,
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: !cgaMode ? 'var(--accent)' : 'var(--text-muted)' }}>⚡ UACS</span>
+        {/* Mode Selection Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
           <button
-            onClick={() => setCgaMode(v => !v)}
+            type="button"
+            onClick={() => setCgaMode(false)}
             style={{
-              width: 52, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer',
-              background: cgaMode ? 'var(--accent)' : 'var(--bg-hover)',
-              position: 'relative', transition: 'background 0.35s',
+              padding: '16px', borderRadius: '12px', border: '1px solid var(--border)',
+              background: !cgaMode ? 'var(--bg-selected)' : 'var(--bg-surface)',
+              color: !cgaMode ? 'var(--accent)' : 'var(--text-primary)',
+              cursor: 'pointer', transition: 'all 0.2s',
+              textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+              borderColor: !cgaMode ? 'var(--accent)' : 'var(--border)'
             }}
-            aria-label="Switch between UACS and CivicGuard AI"
           >
-            <span style={{
-              position: 'absolute', top: 4, left: cgaMode ? 28 : 4,
-              width: 20, height: 20, borderRadius: '50%', background: 'white',
-              transition: 'left 0.35s', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-            }} />
+            <Shield style={{ width: 24, height: 24 }} />
+            <span style={{ fontWeight: 700, fontSize: 14 }}>UACS Portal</span>
           </button>
-          <span style={{ fontSize: 12, fontWeight: 700, color: cgaMode ? 'var(--accent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Shield style={{ width: 12, height: 12 }} /> CivicGuard AI
-          </span>
-        </div>
-
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 64, height: 64, borderRadius: 18, marginBottom: 16,
-            background: 'var(--accent)',
-            color: 'white',
-            transition: 'all 0.4s ease',
-          }}>
-            {cgaMode
-              ? <Shield style={{ width: 30, height: 30, color: 'white' }} />
-              : <Lock style={{ width: 30, height: 30, color: 'white' }} />}
-          </div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0, transition: 'color 0.3s' }}>
-            {cgaMode ? 'CivicGuard AI' : 'UACS Portal'}
-          </h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-            {cgaMode ? 'Misinformation Detection' : 'Communication System'}
-          </p>
+          <button
+            type="button"
+            onClick={() => setCgaMode(true)}
+            style={{
+              padding: '16px', borderRadius: '12px', border: '1px solid var(--border)',
+              background: cgaMode ? 'var(--bg-selected)' : 'var(--bg-surface)',
+              color: cgaMode ? 'var(--accent)' : 'var(--text-primary)',
+              cursor: 'pointer', transition: 'all 0.2s',
+              textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+              borderColor: cgaMode ? 'var(--accent)' : 'var(--border)'
+            }}
+          >
+            <AlertCircle style={{ width: 24, height: 24 }} />
+            <span style={{ fontWeight: 700, fontSize: 14 }}>CivicGuard AI</span>
+          </button>
         </div>
 
         {/* Tab switcher */}

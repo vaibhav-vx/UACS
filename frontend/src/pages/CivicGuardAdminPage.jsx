@@ -3,7 +3,7 @@ import {
   Shield, AlertOctagon, CheckCircle2, XCircle, AlertTriangle, Clock,
   RotateCcw, Loader2, RefreshCw, Send, Eye, Users, TrendingUp, Search
 } from 'lucide-react';
-import { cgaApi } from '../cgaApi';
+import { cgaApi } from '../api';
 import toast from 'react-hot-toast';
 import SituationMapCard from '../components/SituationMapCard';
 

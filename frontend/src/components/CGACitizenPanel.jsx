@@ -3,7 +3,7 @@ import {
   Shield, MessageSquare, Upload, Loader2, CheckCircle2, AlertTriangle,
   XCircle, Clock, AlertOctagon, ArrowLeft, Share2, RotateCcw, ImageIcon, X
 } from 'lucide-react';
-import { cgaApi } from '../cgaApi';
+import { cgaApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 // ── Verdict config ──────────────────────────────────────────────

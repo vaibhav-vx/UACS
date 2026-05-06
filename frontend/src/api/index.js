@@ -115,3 +115,6 @@ export const nasaApi = {
 };
 
 export default api;
+
+// ─── CivicGuard AI API ───
+export { cgaApi } from './cgaApi.js';

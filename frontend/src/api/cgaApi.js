@@ -2,7 +2,7 @@
 // UACS CGA API Service Layer
 // ═══════════════════════════════════════
 
-import api from './api';
+import api from './index';
 
 export const cgaApi = {
   // Citizen: verify a text claim

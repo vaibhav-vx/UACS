@@ -4,6 +4,14 @@ import { MapIcon, X, Search, Check } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+const LABEL_SEARCH_LOCATION = 'Search Location';
+const LABEL_ZONE_LABEL = 'Zone Label';
+const LABEL_ALERT_RADIUS = 'Alert Radius: ';
+const LABEL_QUICK_SELECT = 'Quick Select City';
+const LABEL_LATITUDE = 'Latitude';
+const LABEL_LONGITUDE = 'Longitude';
+const LABEL_CANCEL = 'Cancel';
+
 const PRESET_ZONES = [
   { name: 'North Delhi', lat: 28.7041, lng: 77.1025 },
   { name: 'South Mumbai', lat: 18.9388, lng: 72.8354 },
@@ -34,9 +42,18 @@ export default function MapZonePicker({ value, onChange, onClose }) {
     if (circleRef.current) circleRef.current.remove();
 
     // Custom marker icon
+    const el = document.createElement('div');
+    el.style.width = '28px';
+    el.style.height = '28px';
+    el.style.background = 'var(--accent,#0ea5e9)';
+    el.style.borderRadius = '50% 50% 50% 0';
+    el.style.transform = 'rotate(-45deg)';
+    el.style.border = '3px solid white';
+    el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
+
     const icon = L.divIcon({
       className: '',
-      html: `<div style="width:28px;height:28px;background:var(--accent,#0ea5e9);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`,
+      html: el,
       iconSize: [28, 28],
       iconAnchor: [14, 28],
     });
@@ -105,17 +122,13 @@ export default function MapZonePicker({ value, onChange, onClose }) {
   // Update circle when radius changes
   useEffect(() => {
     if (!selectedCoords) return;
-    import('leaflet').then((L) => {
-      updateMapIconOverlay(selectedCoords.lat, selectedCoords.lng, radius, L);
-    });
+    updateMapIconOverlay(selectedCoords.lat, selectedCoords.lng, radius);
   }, [radius]);
 
   const handlePreset = (zone) => {
     setSelectedCoords({ lat: zone.lat, lng: zone.lng });
     setZoneName(zone.name);
-    import('leaflet').then((L) => {
-      updateMapIconOverlay(zone.lat, zone.lng, radius, L);
-    });
+    updateMapIconOverlay(zone.lat, zone.lng, radius);
   };
 
   const handleSearch = async (e) => {
@@ -132,7 +145,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
         // Use just first 2 parts of the display name for clarity
         const shortName = display_name.split(',').slice(0, 2).join(',').trim();
         setZoneName(shortName);
-        import('leaflet').then((L) => updateMapIconOverlay(parsed.lat, parsed.lng, radius, L));
+        updateMapIconOverlay(parsed.lat, parsed.lng, radius);
       } else {
         alert('Location not found. Try a different search term.');
       }
@@ -169,7 +182,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
           <div className="w-full md:w-72 shrink-0 p-4 border-b md:border-b-0 md:border-r border-[var(--border)] space-y-4 overflow-y-auto bg-theme-surface/30">
             {/* Search */}
             <div>
-              <label className="text-[10px] md:text-xs font-bold text-theme-muted uppercase tracking-widest">Search Location</label>
+              <label className="text-[10px] md:text-xs font-bold text-theme-muted uppercase tracking-widest">{LABEL_SEARCH_LOCATION}</label>
               <div className="flex gap-2 mt-1.5">
                 <input
                   type="text"
@@ -187,7 +200,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
 
             {/* Zone name override */}
             <div>
-              <label className="text-xs font-semibold text-theme-muted uppercase tracking-wider">Zone Label</label>
+              <label className="text-xs font-semibold text-theme-muted uppercase tracking-wider">{LABEL_ZONE_LABEL}</label>
               <input
                 type="text"
                 value={zoneName}
@@ -199,7 +212,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
 
             {/* Radius */}
             <div>
-              <label className="text-xs font-semibold text-theme-muted uppercase tracking-wider">Alert Radius: {radius} km</label>
+              <label className="text-xs font-semibold text-theme-muted uppercase tracking-wider">{LABEL_ALERT_RADIUS}{radius} km</label>
               <input
                 type="range" min={1} max={50} value={radius}
                 onChange={e => setRadius(Number(e.target.value))}
@@ -209,7 +222,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
 
             {/* Presets */}
             <div>
-              <label className="text-xs font-semibold text-theme-muted uppercase tracking-wider">Quick Select City</label>
+              <label className="text-xs font-semibold text-theme-muted uppercase tracking-wider">{LABEL_QUICK_SELECT}</label>
               <div className="mt-1.5 space-y-1">
                 {PRESET_ZONES.map(z => (
                   <button key={z.name} onClick={() => handlePreset(z)}
@@ -228,7 +241,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
             {/* Manual Lat/Lng Entry */}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold text-theme-muted uppercase">Latitude</label>
+                <label className="text-[10px] font-bold text-theme-muted uppercase">{LABEL_LATITUDE}</label>
                 <input
                   type="number"
                   step="0.000001"
@@ -237,13 +250,13 @@ export default function MapZonePicker({ value, onChange, onClose }) {
                     const lat = parseFloat(e.target.value);
                     const lng = selectedCoords?.lng || 78.9629;
                     setSelectedCoords({ lat, lng });
-                    import('leaflet').then(L => updateMapIconOverlay(lat, lng, radius, L));
+                    updateMapIconOverlay(lat, lng, radius);
                   }}
                   className="input-field w-full text-xs py-1"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-theme-muted uppercase">Longitude</label>
+                <label className="text-[10px] font-bold text-theme-muted uppercase">{LABEL_LONGITUDE}</label>
                 <input
                   type="number"
                   step="0.000001"
@@ -252,7 +265,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
                     const lng = parseFloat(e.target.value);
                     const lat = selectedCoords?.lat || 20.5937;
                     setSelectedCoords({ lat, lng });
-                    import('leaflet').then(L => updateMapIconOverlay(lat, lng, radius, L));
+                    updateMapIconOverlay(lat, lng, radius);
                   }}
                   className="input-field w-full text-xs py-1"
                 />
@@ -270,7 +283,7 @@ export default function MapZonePicker({ value, onChange, onClose }) {
 
         {/* Footer */}
         <div className="p-4 border-t border-[var(--border)] flex gap-3 justify-end shrink-0" style={{ background: 'var(--bg-surface)' }}>
-          <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+          <button type="button" onClick={onClose} className="btn-secondary">{LABEL_CANCEL}</button>
           <button type="button" onClick={handleConfirm} disabled={!zoneName.trim() && !selectedCoords} className="btn-primary">
             <Check className="w-4 h-4" /> Confirm Zone: {zoneName || '(click map first)'}
           </button>

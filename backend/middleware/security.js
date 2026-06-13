@@ -26,7 +26,6 @@ export const authLimiter = rateLimit({
   legacyHeaders:    false,
   skipSuccessfulRequests: true,      // only count failures
   handler:          rateLimitHandler,
-  keyGenerator:     (req) => req.ip,
 });
 
 // ─── 2. OTP limiter — 3 sends / 15 min per IP ────────────────────
@@ -47,14 +46,6 @@ export const apiLimiter = rateLimit({
   handler:          rateLimitHandler,
 });
 
-// ─── 4. CGA verify limiter — 20 verifications / 5 min per IP ─────
-export const cgaLimiter = rateLimit({
-  windowMs:         5 * 60 * 1000,
-  max:              20,
-  standardHeaders:  true,
-  legacyHeaders:    false,
-  handler:          rateLimitHandler,
-});
 
 // ─── 5. Dispatch limiter — 10 dispatches / 5 min (admin) ─────────
 export const dispatchLimiter = rateLimit({
@@ -80,11 +71,14 @@ export function sanitizeBody(maxDepth = 4) {
   return (req, _res, next) => {
     const sanitize = (obj, depth) => {
       if (depth > maxDepth || obj === null || typeof obj !== 'object') return;
-      for (const key of Object.keys(obj)) {
-        if (typeof obj[key] === 'string') {
-          obj[key] = sanitizeString(obj[key]);
-        } else if (typeof obj[key] === 'object') {
-          sanitize(obj[key], depth + 1);
+      for (const [key, val] of Object.entries(obj)) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          continue;
+        }
+        if (typeof val === 'string') {
+          obj[key] = sanitizeString(val);
+        } else if (val && typeof val === 'object') {
+          sanitize(val, depth + 1);
         }
       }
     };
@@ -154,13 +148,6 @@ export const rules = {
       .optional().isLength({ max: 200 }).withMessage('Zone too long'),
   ],
 
-  cgaVerify: [
-    body('claim_text')
-      .optional().isLength({ max: 10000 }).withMessage('Claim text too long (max 10000 chars)'),
-    body('input_url')
-      .optional().isURL().withMessage('Invalid URL format'),
-  ],
-
   idParam: [
     param('id')
       .isInt({ min: 1 }).withMessage('Invalid ID parameter'),
@@ -169,6 +156,17 @@ export const rules = {
 
 // ─── Helmet security headers preset ──────────────────────────────
 export const helmetConfig = helmet({
-  contentSecurityPolicy: false, // managed by Vercel/nginx in prod
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "https://xyokjpaqojnwtgihhpli.supabase.co", "https://nominatim.openstreetmap.org", "https://*.tile.openstreetmap.org", "https://*.basemaps.cartocdn.com", "https://server.arcgisonline.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
   crossOriginEmbedderPolicy: false,
 });

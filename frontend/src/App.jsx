@@ -5,8 +5,7 @@ import {
   LayoutDashboard, PenSquare, CheckCircle2, ScrollText, LogOut,
   Menu, X, Sun, Moon, Globe, ChevronDown, Users, BookTemplate, Map as MapIcon, Play,
   Zap,
-  BookOpen,
-  Shield
+  BookOpen
 } from 'lucide-react';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
@@ -29,12 +28,11 @@ import SettingsPage   from './pages/SettingsPage';
 import SurvivalGuidePage from './pages/SurvivalGuidePage';
 import SOSResponsePage from './pages/SOSResponsePage';
 import UserNotificationBar from './components/UserNotificationBar';
-import CivicGuardAdminPage from './pages/CivicGuardAdminPage';
-import CivicGuardPage      from './pages/CivicGuardPage';
+
+const APP_BRAND = 'UACS';
 
 const NAV_ITEMS = [
   { path: '/dashboard',  labelKey: 'dashboard',  icon: LayoutDashboard, roles: ['admin', 'user'] },
-  { path: '/cga',        labelKey: 'civicGuardAI', icon: Shield,           roles: ['user'] },
   { path: '/survival',   labelKey: 'survivalGuide', icon: BookOpen,        roles: ['user'] },
   { path: '/history',    labelKey: 'history',    icon: ScrollText,      roles: ['user'] },
   { path: '/evacuation', labelKey: 'evacuation', icon: MapIcon,            roles: ['user'] },
@@ -50,7 +48,6 @@ const NAV_ITEMS = [
   { path: '/recipients', labelKey: 'recipients',  icon: Users,           roles: ['admin'] },
   { path: '/audit',      labelKey: 'auditLog',    icon: ScrollText,      roles: ['admin'] },
   { path: '/sos-center', labelKey: 'sosCenter',   icon: Zap,    roles: ['admin'] },
-  { path: '/admin/cga',  labelKey: 'civicGuardAI', icon: Shield, roles: ['admin'] },
 ];
 
 /* ── Language Switcher ─────────────────────────────── */
@@ -164,7 +161,7 @@ function AppLayout() {
       >
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.02em' }}>UACS</span>
+          <span style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.02em' }}>{APP_BRAND}</span>
         </div>
 
         {/* Controls */}
@@ -223,7 +220,7 @@ function AppLayout() {
             {/* Logo block */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
               <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                <div style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>UACS</div>
+                <div style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{APP_BRAND}</div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {t('unifiedComms')}
                 </div>
@@ -340,7 +337,6 @@ function AppLayout() {
             {user?.role?.toLowerCase() === 'user' && !isSimulation && <UserNotificationBar user={user} />}
             <Routes>
               <Route path="/dashboard"    element={<DashboardPage />} />
-              <Route path="/cga"          element={<CivicGuardPage />} />
               <Route path="/survival"     element={<SurvivalGuidePage />} />
               <Route path="/history"      element={<NotificationsPage />} />
               <Route path="/evacuation"   element={<EvacuationPage />} />
@@ -355,7 +351,6 @@ function AppLayout() {
               <Route path="/audit"        element={user?.role?.toLowerCase() === 'admin' ? <AuditLogPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/admin/simulation" element={user?.role?.toLowerCase() === 'admin' ? <SimulationPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/sos-center" element={user?.role?.toLowerCase() === 'admin' ? <SOSResponsePage /> : <Navigate to="/dashboard" replace />} />
-              <Route path="/admin/cga"  element={user?.role?.toLowerCase() === 'admin' ? <CivicGuardAdminPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="/profile"      element={<ProfilePage />} />
               <Route path="/map"          element={user?.role?.toLowerCase() === 'user' ? <MapPage /> : <Navigate to="/dashboard" replace />} />
               <Route path="*"             element={<Navigate to="/dashboard" replace />} />

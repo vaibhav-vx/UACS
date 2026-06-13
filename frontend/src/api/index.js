@@ -114,7 +114,9 @@ export const nasaApi = {
   getEvents: (days = 30) => axios.get('https://eonet.gsfc.nasa.gov/api/v3/events', { params: { status: 'open', days } }),
 };
 
-export default api;
+// ─── USGS Earthquake API ───
+export const usgsApi = {
+  getEarthquakes: (timeframe = 'day') => axios.get(`https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_${timeframe}.geojson`),
+};
 
-// ─── CivicGuard AI API ───
-export { cgaApi } from './cgaApi.js';
+export default api;

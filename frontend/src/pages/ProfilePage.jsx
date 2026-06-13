@@ -106,7 +106,7 @@ export default function ProfilePage() {
       setLng(user.lng || null);
       setLang(user.language || 'english');
     }
-    import('../api').then(m => m.authApi.getPreferences().then(res => {
+    authApi.getPreferences().then(res => {
       if (res.data) {
         setLang(res.data.language || 'english');
         setZone(res.data.zone || 'General');
@@ -114,7 +114,7 @@ export default function ProfilePage() {
         setLng(res.data.lng || null);
         setSmsActive(res.data.active !== false);
       }
-    }).catch(console.error));
+    }).catch(console.error);
   }, [user]);
 
   const saveProfile = async () => {

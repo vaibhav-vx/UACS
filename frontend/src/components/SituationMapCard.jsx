@@ -3,9 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, LayersControl, useMapEv
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Maximize2, Minimize2, Map as MapIcon, Layers, X, Send, AlertTriangle, RefreshCw } from 'lucide-react';
-import { messagesApi, nasaApi } from '../api';
+import { messagesApi, nasaApi, recipientsApi } from '../api';
 import toast from 'react-hot-toast';
 import { ZONE_COORDS } from '../constants';
+import ShockwaveCircle from './ShockwaveCircle';
 
 const { BaseLayer } = LayersControl;
 
@@ -15,6 +16,34 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+const ZONE_COORDS_MAP = new Map(Object.entries(ZONE_COORDS));
+const getZoneCoords = (zoneName) => {
+  if (zoneName && ZONE_COORDS_MAP.has(zoneName)) {
+    return ZONE_COORDS_MAP.get(zoneName);
+  }
+  return ZONE_COORDS_MAP.get('General') || [20.5937, 78.9629];
+};
+
+const getMapSizeClass = (size) => {
+  if (size === 'small') return 'map-card-small';
+  if (size === 'large') return 'map-card-large';
+  return 'map-card-medium';
+};
+
+const LABEL_ZONE = 'Zone: ';
+const NASA_PREFIX = 'NASA: ';
+
+const recipientIcon = L.divIcon({
+  html: (() => {
+    const el = document.createElement('div');
+    el.style.fontSize = '14px';
+    el.textContent = '👤';
+    return el;
+  })(),
+  className: 'custom-div-icon',
+  iconSize: [20, 20],
 });
 
 
@@ -55,7 +84,7 @@ export default function SituationMapCard() {
         const [msgRes, nasaRes, recRes] = await Promise.all([
           messagesApi.getAll('active'),
           nasaApi.getEvents(30).catch(() => ({ data: { events: [] } })),
-          import('../api').then(m => m.recipientsApi.getAll()).catch(() => ({ data: [] }))
+          recipientsApi.getAll().catch(() => ({ data: [] }))
         ]);
         setAlerts(msgRes.data);
         setNasaEvents(nasaRes.data.events || []);
@@ -71,17 +100,18 @@ export default function SituationMapCard() {
     return () => clearInterval(iv);
   }, []);
 
-  const sizeClasses = {
-    small: 'map-card-small',
-    medium: 'map-card-medium',
-    large: 'map-card-large'
-  };
 
-  const alertIcon = (urgency) => L.divIcon({
-    html: `<div class="map-alert-icon ${urgency}">${urgency === 'critical' ? '🚨' : '⚠️'}</div>`,
-    className: 'custom-div-icon',
-    iconSize: [30, 30],
-  });
+
+  const alertIcon = (urgency) => {
+    const el = document.createElement('div');
+    el.className = `map-alert-icon ${urgency}`;
+    el.textContent = urgency === 'critical' ? '🚨' : '⚠️';
+    return L.divIcon({
+      html: el,
+      className: 'custom-div-icon',
+      iconSize: [30, 30],
+    });
+  };
 
   const nasaIcon = (categories) => {
     const catId = categories[0]?.id?.toLowerCase() || '';
@@ -91,8 +121,13 @@ export default function SituationMapCard() {
     if (catId.includes('flood')) emoji = '🌊';
     if (catId.includes('volcano')) emoji = '🌋';
     if (catId.includes('earthquake')) emoji = '🫨';
+
+    const el = document.createElement('div');
+    el.className = 'map-nasa-icon';
+    el.textContent = emoji;
+
     return L.divIcon({
-      html: `<div class="map-nasa-icon">${emoji}</div>`,
+      html: el,
       className: 'custom-div-icon',
       iconSize: [22, 22],
     });
@@ -130,7 +165,7 @@ export default function SituationMapCard() {
   };
 
   return (
-    <div className={`glass-card transition-all duration-500 map-card-resizable ${sizeClasses[mapSize]} relative shadow-2xl border-0`}>
+    <div className={`glass-card transition-all duration-500 map-card-resizable ${getMapSizeClass(mapSize)} relative shadow-2xl border-0`}>
 
 
       {/* Map Size Controls (Bottom Right) */}
@@ -200,7 +235,15 @@ export default function SituationMapCard() {
               radius={(Number(pinRadius) || 5) * 1000} 
               pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.15, weight: 2, dashArray: '5, 5' }} 
             />
-            <Marker position={clickPos} icon={L.divIcon({ html: '📍', className: 'text-2xl' })}>
+            <Marker position={clickPos} icon={L.divIcon({
+              html: (() => {
+                const el = document.createElement('div');
+                el.className = 'text-2xl';
+                el.textContent = '📍';
+                return el;
+              })(),
+              className: '',
+            })}>
               <Popup minWidth={260}>
                 <div className="p-3 space-y-3">
                   <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase tracking-tighter">
@@ -289,21 +332,21 @@ export default function SituationMapCard() {
         )}
         
         {alerts.map(alert => {
-          const pos = alert.lat && alert.lng ? [alert.lat, alert.lng] : (ZONE_COORDS[alert.target_zone] || ZONE_COORDS['General']);
+          const pos = alert.lat && alert.lng ? [alert.lat, alert.lng] : getZoneCoords(alert.target_zone);
           const color = alert.urgency === 'critical' ? '#ef4444' : '#f97316';
           return (
             <div key={alert.id}>
-              <Circle 
+              <ShockwaveCircle 
                 center={pos} 
-                radius={(alert.radius || 10) * 1000} 
-                pathOptions={{ color, fillColor: color, fillOpacity: 0.2, weight: 2 }} 
+                maxRadius={(alert.radius || 10) * 1000} 
+                color={color}
               />
               <Marker position={pos} icon={alertIcon(alert.urgency)}>
                 <Popup>
                   <div className="p-1">
                     <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
                     <p className="text-[10px] text-theme-secondary line-clamp-2">{alert.master_content}</p>
-                    <div className="mt-2 text-[8px] font-bold uppercase text-theme-dim">Zone: {alert.target_zone}</div>
+                    <div className="mt-2 text-[8px] font-bold uppercase text-theme-dim">{LABEL_ZONE}{alert.target_zone}</div>
                   </div>
                 </Popup>
               </Marker>
@@ -315,7 +358,7 @@ export default function SituationMapCard() {
         {recipients.map(r => {
           if (!r.lat || !r.lng) return null;
           return (
-            <Marker key={r.id} position={[r.lat, r.lng]} icon={L.divIcon({ html: '<div style="font-size: 14px;">👤</div>', className: 'custom-div-icon', iconSize: [20, 20] })}>
+            <Marker key={r.id} position={[r.lat, r.lng]} icon={recipientIcon}>
               <Popup>
                 <div className="p-1 text-xs">
                   <div className="font-bold">{r.name}</div>
@@ -329,14 +372,14 @@ export default function SituationMapCard() {
 
         {/* NASA Events */}
         {nasaEvents.map(event => {
-          const geometry = event.geometry[event.geometry.length - 1];
+          const geometry = event.geometry.at(-1);
           if (!geometry || !Array.isArray(geometry.coordinates)) return null;
-          const pos = [geometry.coordinates[1], geometry.coordinates[0]];
+          const pos = [geometry.coordinates.at(1), geometry.coordinates.at(0)];
           return (
             <Marker key={event.id} position={pos} icon={nasaIcon(event.categories)}>
               <Popup>
                 <div className="p-1">
-                  <div className="font-bold text-[10px] text-blue-600 uppercase mb-1">NASA: {event.categories[0]?.title}</div>
+                  <div className="font-bold text-[10px] text-blue-600 uppercase mb-1">{NASA_PREFIX}{event.categories.at(0)?.title}</div>
                   <h4 className="font-bold text-xs mb-1">{event.title}</h4>
                   <div className="text-[8px] text-theme-muted">{new Date(geometry.date).toLocaleDateString()}</div>
                 </div>

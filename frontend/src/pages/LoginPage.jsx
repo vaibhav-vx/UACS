@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Lock, Mail, Eye, EyeOff, Loader2, AlertCircle, Sun, Moon, Globe, ChevronDown, 
   User, Map as MapIcon, UserPlus, LogIn, CheckCircle2, ArrowRight, Smartphone, ScrollText, 
-  KeyRound, MapPin, Languages, Shield
+  KeyRound, MapPin, Languages
 } from 'lucide-react';
 import { authApi } from '../api';
 import { useTheme } from '../ThemeContext';
@@ -82,7 +82,6 @@ function PasswordStrength({ password }) {
 // ── Main Page ─────────────────────────────────────────────
 export default function LoginPage() {
   const [tab, setTab] = useState('login');   // 'login' | 'register'
-  const [cgaMode, setCgaMode] = useState(false); // UACS vs CivicGuard AI branding
 
   // Login state
   const [loginPhone, setLoginPhone]       = useState('');
@@ -286,38 +285,6 @@ export default function LoginPage() {
 
       {/* Card */}
       <div className="animate-fade-in" style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
-
-        {/* Mode Selection Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-          <button
-            type="button"
-            onClick={() => setCgaMode(false)}
-            style={{
-              padding: '16px', borderRadius: '12px', border: '1px solid var(--border)',
-              background: !cgaMode ? 'var(--bg-selected)' : 'var(--bg-surface)',
-              color: !cgaMode ? 'var(--accent)' : 'var(--text-primary)',
-              cursor: 'pointer', transition: 'all 0.2s',
-              textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-              borderColor: !cgaMode ? 'var(--accent)' : 'var(--border)'
-            }}
-          >
-            <span style={{ fontWeight: 700, fontSize: 14 }}>UACS Portal</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setCgaMode(true)}
-            style={{
-              padding: '16px', borderRadius: '12px', border: '1px solid var(--border)',
-              background: cgaMode ? 'var(--bg-selected)' : 'var(--bg-surface)',
-              color: cgaMode ? 'var(--accent)' : 'var(--text-primary)',
-              cursor: 'pointer', transition: 'all 0.2s',
-              textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-              borderColor: cgaMode ? 'var(--accent)' : 'var(--border)'
-            }}
-          >
-            <span style={{ fontWeight: 700, fontSize: 14 }}>CivicGuard AI</span>
-          </button>
-        </div>
 
         {/* Tab switcher */}
         <div style={{

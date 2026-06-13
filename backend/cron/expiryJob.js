@@ -31,18 +31,19 @@ async function processExpiredMessages() {
       await dbUpdate('messages', msg.id, { status: 'expired' });
 
       const channels = msg.channels ? JSON.parse(msg.channels) : [];
-      const noteMap = {
-        delete:  `Message expired (action: delete). Title: "${msg.title}"`,
-        replace: `Message expired (action: replace). Replacement: "${msg.expiry_message || 'N/A'}". Channels: ${channels.join(', ')}`,
-        flag:    `Message expired (action: flag). Marked visually as expired.`,
-      };
+      let notes = 'Message expired (action: flag). Marked visually as expired.';
+      if (msg.expiry_action === 'delete') {
+        notes = `Message expired (action: delete). Title: "${msg.title}"`;
+      } else if (msg.expiry_action === 'replace') {
+        notes = `Message expired (action: replace). Replacement: "${msg.expiry_message || 'N/A'}". Channels: ${channels.join(', ')}`;
+      }
 
       await dbInsert('audit_log', {
         message_id:   msg.id,
         action:       'expired',
         performed_by: 'System',
         channel:      msg.expiry_action === 'replace' ? channels.join(',') : null,
-        notes:        noteMap[msg.expiry_action] || noteMap.flag,
+        notes:        notes,
       });
     }
 
@@ -63,7 +64,9 @@ async function processExpiredMessages() {
 export function startExpiryJob() {
   cron.schedule('* * * * *', processExpiredMessages);
   console.log('[UACS EXPIRY] ✅ Cron job started — checking every 60 seconds');
-  processExpiredMessages(); // run once on startup
+  
+  // Delay run once on startup to prevent immediate network connection timeout issues
+  setTimeout(processExpiredMessages, 3000);
 }
 
 export default { startExpiryJob };

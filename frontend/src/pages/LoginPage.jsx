@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Lock, Mail, Eye, EyeOff, Loader2, AlertCircle, Sun, Moon, Globe, ChevronDown, 
-  User, Map as MapIcon, UserPlus, LogIn, CheckCircle2, ArrowRight, Smartphone, ScrollText, 
-  KeyRound, MapPin, Languages
+  Lock, Eye, EyeOff, Loader2, AlertCircle, Sun, Moon, Globe, ChevronDown, 
+  User, Smartphone, LogIn, UserPlus, CheckCircle2, MapPin
 } from 'lucide-react';
 import { authApi } from '../api';
 import { useTheme } from '../ThemeContext';
@@ -21,17 +20,15 @@ const REG_LANGUAGES = [
   { code: 'te', label: 'తెలుగు (Telugu)', flag: '🇮🇳' },
 ];
 
-// Removed Animated background orbs
-
 // ── Input field component ─────────────────────────────────
 function Field({ id, label, icon: Icon, type = 'text', value, onChange, placeholder, autoFocus, autoComplete, rightEl, hint }) {
   return (
-    <div>
-      <label htmlFor={id} style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: 'var(--text-secondary)' }}>
+    <div className="space-y-1.5 text-left">
+      <label htmlFor={id} className="block text-xs font-bold text-theme-muted uppercase tracking-wider">
         {label}
       </label>
-      <div style={{ position: 'relative' }}>
-        <Icon style={{ width: 15, height: 15, position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+      <div className="relative">
+        <Icon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-theme-muted pointer-events-none" />
         <input
           id={id}
           type={type}
@@ -40,12 +37,11 @@ function Field({ id, label, icon: Icon, type = 'text', value, onChange, placehol
           placeholder={placeholder}
           autoFocus={autoFocus}
           autoComplete={autoComplete}
-          className="input-field"
-          style={{ paddingLeft: 36, paddingRight: rightEl ? 40 : undefined, width: '100%' }}
+          className="w-full pl-10 pr-10 py-3 bg-theme-hover border border-theme-border rounded-xl text-sm font-medium placeholder-theme-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
         />
         {rightEl}
       </div>
-      {hint && <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>{hint}</p>}
+      {hint && <p className="text-[10px] text-theme-muted leading-relaxed">{hint}</p>}
     </div>
   );
 }
@@ -60,21 +56,20 @@ function PasswordStrength({ password }) {
   if (/[^A-Za-z0-9]/.test(password)) strength++;
 
   const labels = ['Weak', 'Fair', 'Good', 'Strong'];
-  const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+  const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+  const textColor = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-green-500'];
   const label  = labels[strength - 1] || 'Too short';
-  const color  = colors[strength - 1] || '#ef4444';
+  const colorClass  = colors[strength - 1] || 'bg-red-500';
+  const textClass = textColor[strength - 1] || 'text-red-500';
 
   return (
-    <div style={{ marginTop: 6 }}>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+    <div className="mt-2.5 space-y-1 text-left">
+      <div className="flex gap-1">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 2, transition: 'background 0.3s',
-            background: i <= strength ? color : 'var(--border)',
-          }} />
+          <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i <= strength ? colorClass : 'bg-theme-border'}`} />
         ))}
       </div>
-      <p style={{ fontSize: 11, color, fontWeight: 500 }}>{label}</p>
+      <p className={`text-[10px] font-bold ${textClass}`}>{label}</p>
     </div>
   );
 }
@@ -132,7 +127,7 @@ export default function LoginPage() {
   const { theme, toggleTheme }            = useTheme();
   const { t, language, setLanguage, LANGUAGES } = useLanguage();
   const curLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
-  const { user, setUser }                 = useAuth();
+  const { user }                          = useAuth();
 
   useEffect(() => {
     if (user) { navigate('/dashboard'); return; }
@@ -232,65 +227,81 @@ export default function LoginPage() {
       type="button"
       onClick={toggle}
       tabIndex={-1}
-      style={{
-        position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-        padding: 4, display: 'flex',
-      }}
+      className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer text-theme-muted p-1 flex items-center hover:text-theme-primary transition-colors"
     >
-      {show ? <EyeOff style={{ width: 15, height: 15 }} /> : <Eye style={{ width: 15, height: 15 }} />}
+      {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
     </button>
   );
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, position: 'relative', background: 'var(--bg-base)' }}>
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 bg-theme-base overflow-hidden">
+      
+      {/* ── Figma style flow path design background ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-25 dark:opacity-40 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--bg-base)_80%)] z-10" />
+        <svg className="w-full h-full min-w-[1440px] opacity-70" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="flow-line-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="var(--border)" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="flow-line-grad-2" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="var(--border)" stopOpacity="0.1" />
+              <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.8" />
+            </linearGradient>
+          </defs>
 
-      {/* Top-right: language + theme */}
-      <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', alignItems: 'center', gap: 8, zIndex: 10 }}>
-        <div style={{ position: 'relative' }}>
+          {/* Flows */}
+          <path d="M -100 200 C 300 80, 500 580, 900 280 C 1100 180, 1300 480, 1600 220" stroke="url(#flow-line-grad-1)" strokeWidth="3" strokeDasharray="15, 30" className="animate-flow-line" />
+          <path d="M -100 480 C 400 680, 700 180, 1000 520 C 1200 620, 1400 320, 1600 420" stroke="url(#flow-line-grad-2)" strokeWidth="2.5" strokeDasharray="20, 40" className="animate-flow-line-reverse" />
+          <path d="M -100 80 C 200 280, 600 80, 800 420 C 1000 620, 1300 120, 1600 320" stroke="url(#flow-line-grad-1)" strokeWidth="1.5" strokeDasharray="10, 20" className="animate-flow-line-fast" />
+
+          {/* Tactical Background Grid Lines */}
+          <line x1="-100" y1="150" x2="1600" y2="150" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />
+          <line x1="-100" y1="350" x2="1600" y2="350" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />
+          <line x1="-100" y1="550" x2="1600" y2="550" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />
+          <path d="M 150 0 L 150 800 M 350 0 L 350 800 M 550 0 L 550 800 M 750 0 L 750 800 M 950 0 L 950 800 M 1150 0 L 1150 800 M 1350 0 L 1350 800" stroke="var(--border)" strokeWidth="0.5" strokeOpacity="0.2" />
+        </svg>
+      </div>
+
+      {/* Top-right: language + theme selector */}
+      <div className="absolute top-5 right-5 flex items-center gap-2.5 z-50">
+        <div className="relative">
           <button
             onClick={() => setLangOpen(!langOpen)}
-            className="theme-toggle"
-            style={{ width: 'auto', padding: '0 10px', display: 'flex', alignItems: 'center', gap: 6 }}
+            className="flex items-center gap-1.5 px-3 py-2 bg-theme-hover border border-theme-border rounded-xl text-xs font-bold text-theme-primary cursor-pointer hover:bg-theme-border transition-colors select-none"
+            aria-label="Switch language"
           >
-            <Globe style={{ width: 14, height: 14 }} />
-            <span style={{ fontSize: 13 }}>{curLang.flag}</span>
-            <ChevronDown style={{ width: 12, height: 12 }} />
+            <Globe className="w-3.5 h-3.5 text-theme-muted" />
+            <span>{curLang.flag}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-theme-muted" />
           </button>
           {langOpen && (
-            <div className="animate-fade-in" style={{
-              position: 'absolute', right: 0, top: '100%', marginTop: 4, minWidth: 150, borderRadius: 10,
-              background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', zIndex: 50, overflow: 'hidden',
-            }}>
+            <div className="absolute right-0 top-full mt-1.5 min-w-[160px] rounded-xl bg-theme-surface border border-theme-border shadow-2xl z-50 overflow-hidden animate-fade-in">
               {LANGUAGES.map(l => (
                 <button
                   key={l.code}
                   onClick={() => { setLanguage(l.code); setLangOpen(false); }}
-                  style={{
-                    width: '100%', textAlign: 'left', padding: '9px 14px', fontSize: 13,
-                    display: 'flex', alignItems: 'center', gap: 10, background: language === l.code ? 'var(--accent-bg)' : 'transparent',
-                    color: language === l.code ? 'var(--accent)' : 'var(--text-primary)', border: 'none', cursor: 'pointer',
-                  }}
+                  className={`w-full text-left px-4 py-3 text-xs font-bold flex items-center gap-3 border-0 cursor-pointer transition-colors ${language === l.code ? 'bg-accent/15 text-accent' : 'bg-transparent text-theme-primary hover:bg-theme-hover'}`}
                 >
-                  <span>{l.flag}</span> {l.label}
+                  <span className="text-sm leading-none">{l.flag}</span> {l.label}
                 </button>
               ))}
             </div>
           )}
         </div>
-        <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
-          {theme === 'dark' ? <Sun style={{ width: 15, height: 15 }} /> : <Moon style={{ width: 15, height: 15 }} />}
+        <button onClick={toggleTheme} className="flex items-center justify-center w-9 h-9 bg-theme-hover border border-theme-border rounded-xl text-theme-muted hover:text-theme-primary hover:bg-theme-border cursor-pointer transition-colors" aria-label="Toggle theme">
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-orange-500" /> : <Moon className="w-4 h-4 text-blue-500" />}
         </button>
       </div>
 
       {/* Card */}
-      <div className="animate-fade-in" style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
-
-        {/* Tab switcher */}
-        <div style={{
-          display: 'flex', background: 'var(--bg-surface)', borderRadius: 12,
-          padding: 4, marginBottom: 18, border: '1px solid var(--border)',
-        }}>
+      <div className="relative w-full max-w-[460px] z-20 animate-slide-up">
+        
+        {/* Tab Switcher */}
+        <div className="flex bg-theme-surface/70 backdrop-blur-md p-1.5 rounded-2xl border border-theme-border mb-6">
           {[
             { key: 'login',    label: t('loginButton') || 'Sign In',    Icon: LogIn },
             { key: 'register', label: t('register') || 'Register',   Icon: UserPlus },
@@ -298,16 +309,9 @@ export default function LoginPage() {
             <button
               key={key}
               onClick={() => { setTab(key); setLoginError(''); setRegError(''); }}
-              style={{
-                flex: 1, padding: '9px 0', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                border: 'none', cursor: 'pointer', transition: 'all 0.2s',
-                background: tab === key ? 'var(--accent)' : 'transparent',
-                color: tab === key ? 'white' : 'var(--text-secondary)',
-                boxShadow: tab === key ? '0 2px 8px rgba(59,130,246,0.3)' : 'none',
-              }}
+              className={`flex-1 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 border-0 cursor-pointer transition-all duration-300 ${tab === key ? 'bg-accent text-white shadow-lg shadow-accent/25' : 'bg-transparent text-theme-muted hover:text-theme-primary'}`}
             >
-              <Icon style={{ width: 15, height: 15 }} />
+              <Icon className="w-4 h-4" />
               {label}
             </button>
           ))}
@@ -315,31 +319,28 @@ export default function LoginPage() {
 
         {/* ── Login Form ───────────────────────────────── */}
         {tab === 'login' && (
-          <form onSubmit={handleLogin} className="glass-card animate-fade-in" style={{ padding: 28 }}>
-            <div style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{t('welcomeBack') || 'Welcome back'}</h2>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t('signInToUacs') || 'Sign in to your UACS account'}</p>
+          <form onSubmit={handleLogin} className="glass-card backdrop-blur-xl bg-theme-surface/60 border border-theme-border rounded-3xl p-8 shadow-2xl space-y-6">
+            <div>
+              <h2 className="text-xl font-black text-theme-primary tracking-tight">{t('welcomeBack') || 'Welcome back'}</h2>
+              <p className="text-xs text-theme-muted mt-1">{t('signInToUacs') || 'Sign in to your UACS account'}</p>
             </div>
 
             {loginError && (
-              <div className="animate-fade-in" style={{
-                display: 'flex', alignItems: 'center', gap: 9, padding: '10px 14px', borderRadius: 8,
-                marginBottom: 16, background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: 13,
-              }}>
-                <AlertCircle style={{ width: 15, height: 15, flexShrink: 0 }} />
-                {loginError}
+              <div className="flex items-center gap-3 p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold animate-fade-in">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{loginError}</span>
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="space-y-4">
               <Field
                 id="login-phone"
                 label={t('Mobile No.') || 'Mobile Number'}
-                icon={Mail}
+                icon={Smartphone}
                 type="text"
                 value={loginPhone}
                 onChange={handleLoginPhoneChange}
-                placeholder="Your Number"
+                placeholder="e.g. 99999 99999"
                 autoFocus
               />
               <Field
@@ -359,21 +360,21 @@ export default function LoginPage() {
               type="submit"
               id="login-submit-btn"
               disabled={loginLoading}
-              className="btn-primary"
-              style={{ width: '100%', justifyContent: 'center', padding: '12px 0', fontSize: 14, marginTop: 22, gap: 8 }}
+              className="w-full py-3.5 bg-accent hover:bg-accent/95 disabled:opacity-50 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 border-0 cursor-pointer shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              {loginLoading
-                ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Signing in...</>
-                : <><LogIn style={{ width: 16, height: 16 }} /> Sign In</>
-              }
+              {loginLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t('signingIn') || 'Signing in...'}</>
+              ) : (
+                <><LogIn className="w-4 h-4" /> Sign In</>
+              )}
             </button>
 
-            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
+            <p className="text-center text-xs text-theme-muted">
               {t('dontHaveAccount') || "Don't have an account?"}{' '}
               <button
                 type="button"
                 onClick={() => setTab('register')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontWeight: 600, fontSize: 12, padding: 0 }}
+                className="bg-transparent border-0 cursor-pointer text-accent font-bold text-xs p-0 hover:underline"
               >
                 {t('createOne') || 'Create one'}
               </button>
@@ -383,45 +384,41 @@ export default function LoginPage() {
 
         {/* ── Register Form ─────────────────────────────── */}
         {tab === 'register' && (
-          <form onSubmit={handleRegister} className="glass-card animate-fade-in" style={{ padding: 28 }}>
+          <form onSubmit={handleRegister} className="glass-card backdrop-blur-xl bg-theme-surface/60 border border-theme-border rounded-3xl p-8 shadow-2xl space-y-6">
             {regSuccess ? (
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: '50%', background: 'rgba(34,197,94,0.12)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px',
-                }}>
-                  <CheckCircle2 style={{ width: 28, height: 28, color: '#22c55e' }} />
+              <div className="text-center py-8 space-y-4">
+                <div className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto animate-bounce">
+                  <CheckCircle2 className="w-7 h-7 text-green-500" />
                 </div>
-                <h3 style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>{t('accountCreated') || 'Account Created!'}</h3>
-                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('redirecting') || 'Redirecting to dashboard...'}</p>
+                <div>
+                  <h3 className="font-bold text-lg text-theme-primary">{t('accountCreated') || 'Account Created!'}</h3>
+                  <p className="text-xs text-theme-muted mt-1">{t('redirecting') || 'Redirecting to dashboard...'}</p>
+                </div>
               </div>
             ) : (
               <>
-                <div style={{ marginBottom: 20 }}>
-                  <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{t('createAccount') || 'Create Your Account'}</h2>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t('joinUacs') || 'Citizen Safety Portal — Register to receive zone alerts'}</p>
+                <div>
+                  <h2 className="text-xl font-black text-theme-primary tracking-tight">{t('createAccount') || 'Create Your Account'}</h2>
+                  <p className="text-xs text-theme-muted mt-1">{t('joinUacs') || 'Citizen Safety Portal — Register to receive zone alerts'}</p>
                 </div>
 
                 {regError && (
-                  <div className="animate-fade-in" style={{
-                    display: 'flex', alignItems: 'center', gap: 9, padding: '10px 14px', borderRadius: 8,
-                    marginBottom: 16, background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: 13,
-                  }}>
-                    <AlertCircle style={{ width: 15, height: 15, flexShrink: 0 }} />
-                    {regError}
+                  <div className="flex items-center gap-3 p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold animate-fade-in">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{regError}</span>
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div className="space-y-4">
                   {/* Name & Phone Row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="grid grid-cols-2 gap-3">
                     <Field
                       id="reg-name"
                       label={t('fullName') || 'Full Name'}
                       icon={User}
                       value={regName}
                       onChange={e => { setRegName(e.target.value); setRegError(''); }}
-                      placeholder="e.g. Vaibhav Dubey"
+                      placeholder="e.g. Vaibhav"
                     />
                     <Field
                       id="reg-phone"
@@ -430,39 +427,34 @@ export default function LoginPage() {
                       type="tel"
                       value={regPhone}
                       onChange={e => { setRegPhone(formatPhoneNumber(e.target.value)); setRegError(''); }}
-                      placeholder="Your Number"
+                      placeholder="e.g. 99999 99999"
                     />
                   </div>
 
                   {/* Location Field with Map Picker */}
-                  <div>
+                  <div className="relative">
                     <Field
                       id="reg-dept"
                       label={t('locationZone') || 'Your Location'}
                       icon={MapPin}
                       value={regDept}
                       onChange={e => { setRegDept(e.target.value); setRegError(''); }}
-                      placeholder="Enter your city or area"
+                      placeholder="Enter city/area"
                       hint={regLat ? `📌 Pinned: ${regLat.toFixed(4)}, ${regLng.toFixed(4)}` : t('mapHint') || 'Enter area name or pick from map'}
                       rightEl={
                         <button
                           type="button"
                           onClick={() => setShowMapPicker(true)}
                           title="Pick location on map"
-                          style={{
-                            position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
-                            height: '80%', padding: '0 10px', background: 'var(--accent)',
-                            color: 'white', border: 'none', borderRadius: '6px', fontSize: '16px',
-                            cursor: 'pointer', display: 'flex', alignItems: 'center',
-                          }}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-[80%] px-3 bg-accent text-white border-0 rounded-lg text-sm font-bold cursor-pointer hover:bg-accent/90 flex items-center justify-center transition-colors"
                         >
                           📍
                         </button>
                       }
                     />
                     {zonePreview && (
-                      <p style={{ fontSize: 12, color: '#22c55e', marginTop: 4, fontWeight: 600 }}>
-                        📍 Detected Zone: {zonePreview.zone} — {zonePreview.city}
+                      <p className="text-xs text-green-500 mt-1.5 font-bold flex items-center gap-1">
+                        <span>🛡️</span> Detected Zone: {zonePreview.zone} — {zonePreview.city}
                       </p>
                     )}
                   </div>
@@ -482,22 +474,17 @@ export default function LoginPage() {
                   )}
 
                   {/* Language Selector */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: 'var(--text-secondary)' }}>
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider">
                       Preferred Language
                     </label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    <div className="flex flex-wrap gap-1.5">
                       {REG_LANGUAGES.map(l => (
                         <button
                           key={l.code}
                           type="button"
                           onClick={() => setRegLanguage(l.code)}
-                          style={{
-                            padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                            border: `1px solid ${regLanguage === l.code ? 'var(--accent-border)' : 'var(--border)'}`,
-                            background: regLanguage === l.code ? 'var(--accent-bg)' : 'var(--bg-input)',
-                            color: regLanguage === l.code ? 'var(--accent)' : 'var(--text-secondary)',
-                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border transition-all duration-200 ${regLanguage === l.code ? 'border-accent bg-accent/10 text-accent' : 'border-theme-border bg-theme-hover text-theme-muted hover:text-theme-primary'}`}
                         >
                           {l.flag} {l.label}
                         </button>
@@ -530,49 +517,47 @@ export default function LoginPage() {
                       type={showConfirmPwd ? 'text' : 'password'}
                       value={regConfirm}
                       onChange={e => { setRegConfirm(e.target.value); setRegError(''); }}
-                      placeholder="Re-enter your password"
+                      placeholder="Re-enter password"
                       autoComplete="new-password"
                       rightEl={<EyeBtn show={showConfirmPwd} toggle={() => setShowConfirmPwd(v => !v)} />}
                     />
                     {regConfirm.length > 0 && (
-                      <p style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: passwordsMatch ? '#22c55e' : '#ef4444' }}>
+                      <p className={`text-[10px] font-bold mt-1.5 ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>
                         {passwordsMatch ? '✅ Passwords match' : '❌ Passwords do not match'}
                       </p>
                     )}
                   </div>
                 </div>
 
-                  <div style={{ marginTop: 8 }}>
-                    <button
-                      type="submit"
-                      disabled={regLoading || !canSubmitReg}
-                      className="btn-primary"
-                      style={{ width: '100%', height: 48, borderRadius: 12, fontSize: 15, fontWeight: 700, gap: 10, opacity: canSubmitReg ? 1 : 0.5 }}
-                    >
-                      {regLoading ? (
-                        <><Loader2 className="animate-spin" style={{ width: 20, height: 20 }} /> {t('creatingAccount') || 'Creating Account...'}</>
-                      ) : (
-                        <><CheckCircle2 style={{ width: 20, height: 20 }} /> Create My Account</>
-                      )}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={handleDemoLogin}
-                      disabled={regLoading}
-                      className="btn-secondary"
-                      style={{ width: '100%', height: 48, borderRadius: 12, fontSize: 15, fontWeight: 700, gap: 10, marginTop: 12 }}
-                    >
-                      <UserPlus style={{ width: 20, height: 20 }} /> {t('demoLogin') || 'Try Demo Profile'}
-                    </button>
-                  </div>
+                <div className="space-y-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={regLoading || !canSubmitReg}
+                    className="w-full py-3.5 bg-accent hover:bg-accent/95 disabled:opacity-50 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 border-0 cursor-pointer shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    {regLoading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> {t('creatingAccount') || 'Creating Account...'}</>
+                    ) : (
+                      <><CheckCircle2 className="w-4 h-4" /> Create My Account</>
+                    )}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={handleDemoLogin}
+                    disabled={regLoading}
+                    className="w-full py-3.5 bg-theme-hover hover:bg-theme-border border border-theme-border text-theme-primary rounded-xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    <UserPlus className="w-4 h-4 text-theme-muted" /> {t('demoLogin') || 'Try Demo Profile'}
+                  </button>
+                </div>
 
-                <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
+                <p className="text-center text-xs text-theme-muted pt-2">
                   {t('alreadyHaveAccount') || 'Already have an account?'}{' '}
                   <button
                     type="button"
                     onClick={() => setTab('login')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontWeight: 600, fontSize: 12, padding: 0 }}
+                    className="bg-transparent border-0 cursor-pointer text-accent font-bold text-xs p-0 hover:underline"
                   >
                     {t('loginButton') || 'Sign in'}
                   </button>
@@ -582,7 +567,7 @@ export default function LoginPage() {
           </form>
         )}
 
-        <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', marginTop: 24 }}>
+        <p className="text-center text-[10px] text-theme-muted mt-6 font-medium">
           🇮🇳 {t('govFooter') || 'Government of India • Secure Communication Portal • v1.0'}
         </p>
       </div>

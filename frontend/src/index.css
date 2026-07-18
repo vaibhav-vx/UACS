@@ -425,8 +425,17 @@
   100% { transform: translateX(-33.3333%); }
 }
 
+@keyframes flow-line-dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
 .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-flow-line { animation: flow-line-dash 30s linear infinite; }
+.animate-flow-line-reverse { animation: flow-line-dash 45s linear infinite reverse; }
+.animate-flow-line-fast { animation: flow-line-dash 15s linear infinite; }
 
 .page-transition {
   animation: fadeIn 0.3s ease-out;

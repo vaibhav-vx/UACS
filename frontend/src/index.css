@@ -229,8 +229,14 @@
   }
 
   .shimmer {
-    background: var(--bg-surface);
-    animation: pulse-fast 1.5s infinite;
+    background: linear-gradient(
+      90deg,
+      var(--bg-surface) 25%,
+      var(--bg-hover) 50%,
+      var(--bg-surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
   }
 
   /* ─── Buttons ─── */
@@ -576,6 +582,16 @@ p, span, h1, h2, h3, h4, h5, h6, div, td, th {
 .animate-glitch { animation: pulse-glitch 0.3s ease-in-out infinite; }
 .animate-float { animation: float-slow 3s ease-in-out infinite; }
 .animate-scale-up { animation: scaleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08) 25%,
+    rgba(255,255,255,0.24) 50%,
+    rgba(255,255,255,0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
 
 .cinematic-text {
   font-family: 'Inter', sans-serif;

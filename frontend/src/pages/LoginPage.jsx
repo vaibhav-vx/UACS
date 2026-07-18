@@ -251,34 +251,12 @@ export default function LoginPage() {
               <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.4" />
               <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.8" />
             </linearGradient>
-            <filter id="stream-blur">
-              <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
           </defs>
 
-          {/* Flow 1 Glow Underlayer */}
-          <path d="M -100 200 C 300 80, 500 580, 900 280 C 1100 180, 1300 480, 1600 220" stroke="var(--accent)" strokeWidth="6" opacity="0.15" filter="url(#stream-blur)" />
-          {/* Flow 1 Main Line */}
-          <path d="M -100 200 C 300 80, 500 580, 900 280 C 1100 180, 1300 480, 1600 220" stroke="url(#flow-line-grad-1)" strokeWidth="2.5" strokeDasharray="15, 30" className="animate-flow-line" />
-
-          {/* Flow 2 Glow Underlayer */}
-          <path d="M -100 480 C 400 680, 700 180, 1000 520 C 1200 620, 1400 320, 1600 420" stroke="var(--accent)" strokeWidth="5" opacity="0.12" filter="url(#stream-blur)" />
-          {/* Flow 2 Main Line */}
-          <path d="M -100 480 C 400 680, 700 180, 1000 520 C 1200 620, 1400 320, 1600 420" stroke="url(#flow-line-grad-2)" strokeWidth="2" strokeDasharray="20, 40" className="animate-flow-line-reverse" />
-
-          {/* Flow 3 Glow Underlayer */}
-          <path d="M -100 80 C 200 280, 600 80, 800 420 C 1000 620, 1300 120, 1600 320" stroke="var(--accent)" strokeWidth="4" opacity="0.1" filter="url(#stream-blur)" />
-          {/* Flow 3 Main Line */}
-          <path d="M -100 80 C 200 280, 600 80, 800 420 C 1000 620, 1300 120, 1600 320" stroke="url(#flow-line-grad-1)" strokeWidth="1" strokeDasharray="10, 20" className="animate-flow-line-fast" />
-
-          {/* Glowing stream nodes that move along paths using CSS offset-path */}
-          <circle cx="-100" cy="-100" r="4.5" fill="var(--accent)" className="animate-stream-node-1" style={{ filter: 'drop-shadow(0 0 6px var(--accent))' }} />
-          <circle cx="-100" cy="-100" r="3.5" fill="var(--accent)" className="animate-stream-node-2" style={{ filter: 'drop-shadow(0 0 6px var(--accent))' }} />
-          <circle cx="-100" cy="-100" r="5" fill="var(--accent)" className="animate-stream-node-3" style={{ filter: 'drop-shadow(0 0 6px var(--accent))' }} />
+          {/* Flows */}
+          <path d="M -100 200 C 300 80, 500 580, 900 280 C 1100 180, 1300 480, 1600 220" stroke="url(#flow-line-grad-1)" strokeWidth="3" strokeDasharray="15, 30" className="animate-flow-line" />
+          <path d="M -100 480 C 400 680, 700 180, 1000 520 C 1200 620, 1400 320, 1600 420" stroke="url(#flow-line-grad-2)" strokeWidth="2.5" strokeDasharray="20, 40" className="animate-flow-line-reverse" />
+          <path d="M -100 80 C 200 280, 600 80, 800 420 C 1000 620, 1300 120, 1600 320" stroke="url(#flow-line-grad-1)" strokeWidth="1.5" strokeDasharray="10, 20" className="animate-flow-line-fast" />
 
           {/* Tactical Background Grid Lines */}
           <line x1="-100" y1="150" x2="1600" y2="150" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />

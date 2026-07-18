@@ -437,28 +437,6 @@
 .animate-flow-line-reverse { animation: flow-line-dash 45s linear infinite reverse; }
 .animate-flow-line-fast { animation: flow-line-dash 15s linear infinite; }
 
-@keyframes travel-path-1 {
-  0% { offset-distance: 0%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { offset-distance: 100%; opacity: 0; }
-}
-
-.animate-stream-node-1 {
-  offset-path: path('M -100 200 C 300 80, 500 580, 900 280 C 1100 180, 1300 480, 1600 220');
-  animation: travel-path-1 8s infinite linear;
-}
-
-.animate-stream-node-2 {
-  offset-path: path('M -100 480 C 400 680, 700 180, 1000 520 C 1200 620, 1400 320, 1600 420');
-  animation: travel-path-1 12s infinite linear;
-}
-
-.animate-stream-node-3 {
-  offset-path: path('M -100 80 C 200 280, 600 80, 800 420 C 1000 620, 1300 120, 1600 320');
-  animation: travel-path-1 10s infinite linear;
-}
-
 .page-transition {
   animation: fadeIn 0.3s ease-out;
 }

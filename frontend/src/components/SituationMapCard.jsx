@@ -208,8 +208,8 @@ export default function SituationMapCard() {
     if (!clickPos) return;
 
     const el = document.createElement('div');
-    el.style.fontSize = '24px';
-    el.textContent = '📍';
+    el.className = 'glow-marker-active-pin';
+    el.innerHTML = `<svg viewBox="0 0 24 24" width="38" height="38" style="filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><circle cx="12" cy="9" r="3.5" fill="#ffffff"/><circle cx="12" cy="9" r="1.5" fill="#ef4444"/></svg>`;
 
     // Show popup immediately upon pinning
     const popupContent = document.getElementById('rapid-pin-popup-root');

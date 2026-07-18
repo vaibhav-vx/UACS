@@ -674,4 +674,26 @@ p, span, h1, h2, h3, h4, h5, h6, div, td, th {
   background-color: transparent !important;
 }
 
+/* Active Pin Marker Styling */
+.glow-marker-active-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99999 !important;
+  animation: active-pin-bounce 1.5s ease-in-out infinite;
+}
+
+@keyframes active-pin-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+  }
+  50% {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.6));
+  }
+}
+
+
 

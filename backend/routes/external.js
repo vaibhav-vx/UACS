@@ -120,25 +120,25 @@ router.get('/ndma', async (req, res) => {
     const cached = getCached('ndma');
     if (cached) return res.json(cached);
 
-    const xml = await safeFetch('https://sachet.ndma.gov.in/cap_feed/active/atom.xml');
+    const xml = await safeFetch('https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml');
     const parsed = await parseStringPromise(xml, { explicitArray: false });
 
-    const feed = parsed?.feed;
-    const entries = feed?.entry || [];
-    const list = Array.isArray(entries) ? entries : [entries];
+    const channel = parsed?.rss?.channel;
+    const items = channel?.item || [];
+    const list = Array.isArray(items) ? items : [items];
 
     const result = {
       source: 'NDMA SACHET — Government of India',
       fetchedAt: new Date().toISOString(),
       alerts: list.map(e => ({
-        id:        e?.id || '',
-        title:     e?.title?._ || e?.title || '',
-        summary:   e?.summary?._ || e?.summary || '',
-        updated:   e?.updated || '',
-        severity:  e?.['cap:severity'] || e?.severity || '',
-        urgency:   e?.['cap:urgency']  || e?.urgency  || '',
-        area:      e?.['cap:areaDesc'] || e?.areaDesc || '',
-        link:      e?.link?.['$']?.href || e?.link || '',
+        id:        e?.guid?._ || e?.guid || '',
+        title:     e?.title || '',
+        summary:   e?.description || '',
+        updated:   e?.pubDate || '',
+        severity:  e?.severity || 'Moderate',
+        urgency:   e?.urgency  || 'Immediate',
+        area:      e?.title || '',
+        link:      e?.link || '',
       })),
     };
 
@@ -285,11 +285,11 @@ router.get('/emsc', async (req, res) => {
       'https://www.seismicportal.eu/fdsnws/event/1/query',
       {
         params: {
-          format: 'geojson',
+          format: 'json',
           limit: 100,
           minmag: 3.0,
           orderby: 'time',
-          start: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+          starttime: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
         },
       }
     );

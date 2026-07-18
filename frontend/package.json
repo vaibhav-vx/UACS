@@ -12,14 +12,12 @@
     "axios": "^1.14.0",
     "date-fns": "^4.1.0",
     "i18next": "^26.0.8",
-    "leaflet": "^1.9.4",
     "lucide-react": "^1.7.0",
     "maplibre-gl": "^5.24.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-hot-toast": "^2.6.0",
     "react-i18next": "^17.0.6",
-    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.13.2"
   },
   "devDependencies": {

@@ -430,16 +430,6 @@ p, span, h1, h2, h3, h4, h5, h6, div, td, th {
   min-width: 0;
 }
 
-/* Leaflet z-index fix to sit below our modals */
-.leaflet-pane,
-.leaflet-control {
-  z-index: 400 !important;
-}
-.leaflet-top,
-.leaflet-bottom {
-  z-index: 401 !important;
-}
-
 /* Resizable Map Card (Admin & User) */
 .map-card-resizable {
   resize: vertical;

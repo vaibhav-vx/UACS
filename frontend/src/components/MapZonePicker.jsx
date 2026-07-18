@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapIcon, X, Search, Check } from 'lucide-react';
-
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
 const LABEL_SEARCH_LOCATION = 'Search Location';
 const LABEL_ZONE_LABEL = 'Zone Label';
@@ -23,112 +22,167 @@ const PRESET_ZONES = [
   { name: 'Ahmedabad North', lat: 23.0225, lng: 72.5714 },
 ];
 
+// Helper to generate a polygon representing a circle of a given radius in km
+function getCirclePolygon(center, radiusKm) {
+  const [lng, lat] = center;
+  const points = 64;
+  const coords = [];
+  const distanceX = radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180));
+  const distanceY = radiusKm / 110.57;
+
+  for (let i = 0; i < points; i++) {
+    const theta = (i / points) * (2 * Math.PI);
+    const x = distanceX * Math.cos(theta);
+    const y = distanceY * Math.sin(theta);
+    coords.push([lng + x, lat + y]);
+  }
+  coords.push(coords[0]); // Close polygon
+  return {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [coords]
+    }
+  };
+}
+
 export default function MapZonePicker({ value, onChange, onClose }) {
+  const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const leafletMapIcon = useRef(null);
   const markerRef = useRef(null);
-  const circleRef = useRef(null);
+
   const [selectedCoords, setSelectedCoords] = useState(null);
   const [zoneName, setZoneName] = useState(value || '');
   const [radius, setRadius] = useState(5); // km
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
-  const updateMapIconOverlay = useCallback((lat, lng, km) => {
-    if (!leafletMapIcon.current) return;
+  // Update marker and polygon circle overlay
+  const updateMapOverlay = useCallback((lat, lng, km) => {
+    const map = mapRef.current;
+    if (!map) return;
 
-    // Remove old overlays
-    if (markerRef.current) markerRef.current.remove();
-    if (circleRef.current) circleRef.current.remove();
+    // 1. Manage HTML Marker
+    if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
+    }
 
-    // Custom marker icon
     const el = document.createElement('div');
-    el.style.width = '28px';
-    el.style.height = '28px';
-    el.style.background = 'var(--accent,#0ea5e9)';
-    el.style.borderRadius = '50% 50% 50% 0';
-    el.style.transform = 'rotate(-45deg)';
-    el.style.border = '3px solid white';
-    el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
+    el.className = 'glow-marker-active-pin';
+    el.innerHTML = `<svg viewBox="0 0 24 24" width="36" height="36" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5));"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="var(--accent, #0ea5e9)" stroke="#ffffff" stroke-width="1.5"/><circle cx="12" cy="9" r="3" fill="#ffffff"/></svg>`;
 
-    const icon = L.divIcon({
-      className: '',
-      html: el,
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
-    });
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([lng, lat])
+      .addTo(map);
 
-    markerRef.current = L.marker([lat, lng], { icon }).addTo(leafletMapIcon.current);
-    circleRef.current = L.circle([lat, lng], {
-      radius: km * 1000,
-      color: 'var(--accent, #0ea5e9)',
-      fillColor: '#0ea5e9',
-      fillOpacity: 0.15,
-      weight: 2,
-    }).addTo(leafletMapIcon.current);
+    markerRef.current = marker;
 
-    leafletMapIcon.current.flyTo([lat, lng], 11, { duration: 0.8 });
-  }, []);
-
-  useEffect(() => {
-    if (!mapRef.current || leafletMapIcon.current) return;
-
-      // Fix default icon path issue with webpack/vite
-      delete L.Icon.Default.prototype._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    // 2. Manage GeoJSON Radius Source
+    const geojsonCircle = getCirclePolygon([lng, lat], km);
+    const source = map.getSource('radius-source');
+    if (source) {
+      source.setData(geojsonCircle);
+    } else if (mapLoaded) {
+      map.addSource('radius-source', {
+        type: 'geojson',
+        data: geojsonCircle
       });
-
-      leafletMapIcon.current = L.map(mapRef.current, {
-        center: [20.5937, 78.9629], // India center
-        zoom: 5,
-        zoomControl: true,
-      });
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMapIcon contributors',
-        maxZoom: 18,
-      }).addTo(leafletMapIcon.current);
-
-    // Click on map to select zone
-      leafletMapIcon.current.on('click', async (e) => {
-        const { lat, lng } = e.latlng;
-        setSelectedCoords({ lat, lng });
-        updateMapIconOverlay(lat, lng, radius);
-        
-        // Reverse geocode to get zone name
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          const data = await res.json();
-          if (data && data.display_name) {
-            const shortName = data.display_name.split(',').slice(0, 2).join(',').trim();
-            setZoneName(shortName);
-          }
-        } catch (err) {
-          console.error("Reverse geocode failed", err);
+      map.addLayer({
+        id: 'radius-layer-fill',
+        type: 'fill',
+        source: 'radius-source',
+        paint: {
+          'fill-color': '#0ea5e9',
+          'fill-opacity': 0.12
         }
       });
+      map.addLayer({
+        id: 'radius-layer-line',
+        type: 'line',
+        source: 'radius-source',
+        paint: {
+          'line-color': '#0ea5e9',
+          'line-width': 1.5,
+          'line-dasharray': [2, 2]
+        }
+      });
+    }
+
+    map.flyTo({ center: [lng, lat], zoom: 11, essential: true, duration: 800 });
+  }, [mapLoaded]);
+
+  // Initialize MapLibre GL JS
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: {
+        version: 8,
+        sources: {
+          'carto-dark': {
+            type: 'raster',
+            tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'],
+            tileSize: 256,
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
+          }
+        },
+        layers: [{
+          id: 'carto-dark-layer',
+          type: 'raster',
+          source: 'carto-dark',
+          minzoom: 0,
+          maxzoom: 20
+        }]
+      },
+      center: [78.9629, 20.5937], // India center
+      zoom: 4.8,
+    });
+
+    mapRef.current = map;
+
+    map.on('load', () => {
+      setMapLoaded(true);
+    });
+
+    // Handle clicks to pick location
+    map.on('click', (e) => {
+      const { lat, lng } = e.lngLat;
+      setSelectedCoords({ lat, lng });
+    });
 
     return () => {
-      if (leafletMapIcon.current) {
-        leafletMapIcon.current.remove();
-        leafletMapIcon.current = null;
-      }
+      map.remove();
+      mapRef.current = null;
     };
   }, []);
 
-  // Update circle when radius changes
+  // Sync selection when coords change
   useEffect(() => {
     if (!selectedCoords) return;
-    updateMapIconOverlay(selectedCoords.lat, selectedCoords.lng, radius);
-  }, [radius]);
+    updateMapOverlay(selectedCoords.lat, selectedCoords.lng, radius);
+
+    // Reverse geocode to get zone name override
+    const fetchZoneName = async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${selectedCoords.lat}&lon=${selectedCoords.lng}`);
+        const data = await res.json();
+        if (data && data.display_name) {
+          const shortName = data.display_name.split(',').slice(0, 2).join(',').trim();
+          setZoneName(shortName);
+        }
+      } catch (err) {
+        console.error("Reverse geocode failed", err);
+      }
+    };
+    fetchZoneName();
+  }, [selectedCoords, radius, updateMapOverlay]);
 
   const handlePreset = (zone) => {
     setSelectedCoords({ lat: zone.lat, lng: zone.lng });
     setZoneName(zone.name);
-    updateMapIconOverlay(zone.lat, zone.lng, radius);
   };
 
   const handleSearch = async (e) => {
@@ -142,10 +196,8 @@ export default function MapZonePicker({ value, onChange, onClose }) {
         const { lat, lon, display_name } = data[0];
         const parsed = { lat: parseFloat(lat), lng: parseFloat(lon) };
         setSelectedCoords(parsed);
-        // Use just first 2 parts of the display name for clarity
         const shortName = display_name.split(',').slice(0, 2).join(',').trim();
         setZoneName(shortName);
-        updateMapIconOverlay(parsed.lat, parsed.lng, radius);
       } else {
         alert('Location not found. Try a different search term.');
       }
@@ -165,12 +217,12 @@ export default function MapZonePicker({ value, onChange, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="glass-card w-full max-w-3xl shadow-2xl flex flex-col" style={{ maxHeight: '90vh', background: 'var(--bg-base)' }}>
+      <div className="glass-card w-full max-w-3xl shadow-2xl flex flex-col overflow-hidden" style={{ maxHeight: '90vh', background: 'var(--bg-base)' }}>
         {/* Header */}
         <div className="p-4 border-b border-[var(--border)] flex items-center justify-between shrink-0">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <MapIcon className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-            Select Target Zone on MapIcon
+            <MapIcon className="w-5 h-5 text-accent" />
+            Select Target Zone
           </h2>
           <button onClick={onClose} className="text-theme-muted hover:text-theme-primary transition-colors">
             <X className="w-5 h-5" />
@@ -250,7 +302,6 @@ export default function MapZonePicker({ value, onChange, onClose }) {
                     const lat = parseFloat(e.target.value);
                     const lng = selectedCoords?.lng || 78.9629;
                     setSelectedCoords({ lat, lng });
-                    updateMapIconOverlay(lat, lng, radius);
                   }}
                   className="input-field w-full text-xs py-1"
                 />
@@ -265,7 +316,6 @@ export default function MapZonePicker({ value, onChange, onClose }) {
                     const lng = parseFloat(e.target.value);
                     const lat = selectedCoords?.lat || 20.5937;
                     setSelectedCoords({ lat, lng });
-                    updateMapIconOverlay(lat, lng, radius);
                   }}
                   className="input-field w-full text-xs py-1"
                 />
@@ -275,9 +325,9 @@ export default function MapZonePicker({ value, onChange, onClose }) {
             <p className="text-xs text-theme-dim">💡 Click anywhere on the map to pin a custom zone or type coordinates manually above.</p>
           </div>
 
-          {/* MapIcon */}
+          {/* Map Container */}
           <div className="flex-1 relative min-h-[250px] md:min-h-[400px]">
-            <div ref={mapRef} className="w-full h-full" />
+            <div ref={mapContainerRef} className="w-full h-full" />
           </div>
         </div>
 

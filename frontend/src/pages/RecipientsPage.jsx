@@ -9,7 +9,6 @@ import { recipientsApi } from '../api';
 import { useLanguage } from '../i18n/LanguageContext';
 import { detectZoneFromLocation } from '../utils/zoneMapper';
 import MapZonePicker from '../components/MapZonePicker';
-import 'leaflet/dist/leaflet.css';
 
 
 

@@ -6,7 +6,7 @@ import {
   Navigation, Heart, History, BarChart3, CloudRain, Phone, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { messagesApi, authApi, recipientsApi } from '../api';
+import { messagesApi, authApi, recipientsApi, airQualityApi, ndmaApi } from '../api';
 import { useLanguage } from '../i18n/LanguageContext';
 import ExpiryTimer from '../components/ExpiryTimer';
 import ChannelBadge from '../components/ChannelBadge';
@@ -37,7 +37,9 @@ export default function DashboardPage() {
   const [manualExpiryReason, setManualExpiryReason] = useState('');
   const [showMap, setShowMap] = useState(false);
   const [weatherData, setWeatherData] = useState(null);
-  
+  const [aqiData, setAqiData] = useState(null);
+  const [ndmaCount, setNdmaCount] = useState(0);
+
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -46,21 +48,31 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isAdmin) {
-      const fetchWeather = async () => {
+      const fetchWeatherAndAqi = async () => {
         try {
-          const lat = user?.lat || 19.0760; // Default to Mumbai
+          const lat = user?.lat || 19.0760;
           const lng = user?.lng || 72.8777;
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,uv_index`);
+          // Open-Meteo weather (direct, no key)
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,uv_index,wind_speed_10m,precipitation`);
           if (res.ok) {
             const data = await res.json();
             setWeatherData(data.current);
           }
+          // Open-Meteo AQI (via backend proxy)
+          try {
+            const aqiRes = await airQualityApi.getAQI(lat, lng);
+            if (aqiRes?.data) setAqiData(aqiRes.data);
+          } catch (_) { /* AQI is optional */ }
         } catch (err) {
-          console.error("Failed to fetch weather data", err);
+          console.error('Failed to fetch weather/AQI data', err);
         }
       };
-      fetchWeather();
+      fetchWeatherAndAqi();
     }
+    // NDMA alert count for both admin and citizen
+    ndmaApi.getAlerts()
+      .then(res => setNdmaCount(res?.data?.alerts?.length || 0))
+      .catch(() => {});
   }, [isAdmin, user?.lat, user?.lng]);
 
   const fetchData = useCallback(async () => {
@@ -463,6 +475,40 @@ export default function DashboardPage() {
                    {weatherAlert}
                  </div>
                )}
+            </section>
+
+            {/* AIR QUALITY + NDMA ALERTS */}
+            <section className="grid grid-cols-2 gap-4">
+              {/* AQI Card */}
+              <div
+                className="glass-card p-4 rounded-2xl border-0 shadow-xl relative overflow-hidden"
+                style={{ background: `linear-gradient(135deg, ${aqiData?.current?.aqi_color || '#6366f1'}18, ${aqiData?.current?.aqi_color || '#6366f1'}05)` }}
+              >
+                <div className="text-[10px] uppercase font-black tracking-widest text-theme-muted mb-1">Air Quality</div>
+                <div className="text-3xl font-black" style={{ color: aqiData?.current?.aqi_color || '#888' }}>
+                  {aqiData?.current?.european_aqi ?? '--'}
+                </div>
+                <div className="text-xs font-bold mt-0.5" style={{ color: aqiData?.current?.aqi_color || '#888' }}>
+                  {aqiData?.current?.aqi_label || 'Loading...'}
+                </div>
+                <div className="text-[10px] text-theme-muted mt-2 space-y-0.5">
+                  <div>PM2.5: <span className="text-theme-primary font-bold">{aqiData?.current?.pm2_5 ?? '--'} µg/m³</span></div>
+                  <div>PM10: <span className="text-theme-primary font-bold">{aqiData?.current?.pm10 ?? '--'} µg/m³</span></div>
+                </div>
+              </div>
+              {/* NDMA India Alerts */}
+              <div className="glass-card p-4 rounded-2xl border-0 shadow-xl bg-gradient-to-br from-green-500/10 to-green-500/5">
+                <div className="text-[10px] uppercase font-black tracking-widest text-theme-muted mb-1">NDMA India Alerts</div>
+                <div className={`text-3xl font-black ${ndmaCount > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+                  {ndmaCount}
+                </div>
+                <div className={`text-xs font-bold mt-0.5 ${ndmaCount > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+                  {ndmaCount > 0 ? 'Active Alerts' : 'All Clear'}
+                </div>
+                <div className="text-[10px] text-theme-muted mt-2">
+                  Source: NDMA SACHET<br />Govt. of India
+                </div>
+              </div>
             </section>
 
             {/* NEARBY SAFETY HUBS */}

@@ -16,6 +16,7 @@ import dispatchRouter   from './routes/dispatch.js';
 import auditRouter      from './routes/audit.js';
 import recipientsRouter from './routes/recipients.js';
 import webhooksRouter   from './routes/webhooks.js';
+import externalRouter  from './routes/external.js';
 
 // Middleware
 import { authenticate } from './middleware/auth.js';
@@ -63,6 +64,10 @@ app.get('/api/health', (req, res) => {
 
 // Twilio Webhook (Must be public)
 app.use('/api/webhooks', webhooksRouter);
+
+// External API proxy — public (no auth), rate-limited by global limiter
+// Covers all 12 disaster/weather API categories
+app.use('/api/external', externalRouter);
 
 // ─── Protected routes ────────────────────────────────────
 app.use('/api/messages',   authenticate, messagesRouter);

@@ -50,7 +50,7 @@ Everything is logged, auditable, and designed to operate under crisis conditions
 ### For Administrators
 
 | Feature | Description |
-| ------- | ----------- |
+| ------- | ------- |
 | Message Composer | Craft emergency alerts with urgency level, target zone, channel selection, and expiry timer |
 | Auto-Translation | One-click translation to Hindi, Marathi, Tamil, Telugu via Google Translate with MyMemory fallback |
 | Approval Workflow | Draft to Pending to Active pipeline with multi-admin review |
@@ -66,7 +66,7 @@ Everything is logged, auditable, and designed to operate under crisis conditions
 ### For Citizens
 
 | Feature | Description |
-| ------- | ----------- |
+| ------- | ------- |
 | Live Alert Bar | Active alerts appear in-app in the user's native language |
 | I'm Safe / SOS | One-tap status update reported to admin dashboard in real time |
 | Disaster Map | Live USGS earthquake events + NASA disaster layer + evacuation shelters |
@@ -180,7 +180,7 @@ Everything is logged, auditable, and designed to operate under crisis conditions
 All public APIs listed below are **free and require no API key**.
 
 | API | Endpoint | Data Provided |
-| --- | -------- | ------------- |
+| ------- | ------- | ------- |
 | USGS Earthquake | earthquake.usgs.gov/earthquakes/feed/v1.0 | Real-time seismic events - magnitude, coordinates, depth |
 | NASA EONET | eonet.gsfc.nasa.gov/api/v3/events | Open disaster events - wildfires, volcanoes, storms, floods |
 | Open-Meteo | api.open-meteo.com/v1/forecast | Temperature, humidity, UV index, weather code |
@@ -191,7 +191,7 @@ All public APIs listed below are **free and require no API key**.
 **API keys required:**
 
 | API       | Environment Variables                                      | Purpose                   |
-| --------- | ---------------------------------------------------------- | ------------------------- |
+| ------- | ------- | ------- |
 | Twilio    | TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER | SMS dispatch and OTP      |
 | Twitter/X | TWITTER_BEARER_TOKEN                                       | Tweet posting on dispatch |
 
@@ -430,35 +430,46 @@ The frontend runs on `http://localhost:5173` and proxies all `/api/*` requests t
 Create a `.env` file in the project root. All variables are required unless marked optional.
 
 ```env
+
 # JWT
+
 JWT_SECRET=your_super_secret_key_at_least_32_chars_long
 
 # Supabase
+
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your-service-role-key
 
 # Twilio
+
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_PHONE_NUMBER=+1xxxxxxxxxx
+
 # Optional: use a Messaging Service instead of a single number
+
 TWILIO_Messaging_Service_SID=MGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Admin credentials
+
 ADMIN_PHONE=9999999999
 ADMIN_PASSWORD=your_admin_password
 
 # Twitter/X (optional)
+
 TWITTER_BEARER_TOKEN=your_twitter_bearer_token
 
 # CMS Webhook (optional)
+
 CMS_WEBHOOK_URL=https://your-cms.com/webhook/alerts
 
 # Server
+
 PORT=5000
 NODE_ENV=development
 
 # Frontend (Vite)
+
 VITE_API_URL=/api
 ```
 
@@ -473,7 +484,7 @@ All protected routes require the header `Authorization: Bearer <token>`.
 ### Auth Endpoints
 
 | Method | Endpoint | Auth | Description |
-| ------ | -------- | :--: | ----------- |
+| ------- | ------- | :--: | ----------- |
 | POST | /api/auth/login | No | Login with phone and password |
 | POST | /api/auth/register | No | Register new user account |
 | POST | /api/auth/demo | No | Login as demo user |
@@ -489,7 +500,7 @@ All protected routes require the header `Authorization: Bearer <token>`.
 ### Message Endpoints
 
 | Method | Endpoint | Auth | Description |
-| ------ | -------- | :--: | ----------- |
+| ------- | ------- | :--: | ----------- |
 | GET | /api/messages | Yes | List messages, filter by status |
 | POST | /api/messages | Yes | Create new message as draft |
 | GET | /api/messages/stats | Yes | Dashboard statistics |
@@ -510,7 +521,7 @@ All protected routes require the header `Authorization: Bearer <token>`.
 ### Other Endpoints
 
 | Method | Endpoint | Auth | Description |
-| ------ | -------- | :--: | ----------- |
+| ------- | ------- | :--: | ----------- |
 | POST | /api/dispatch/:id | Yes | Dispatch message across all selected channels |
 | GET | /api/recipients | Yes | List recipients, filter by zone |
 | POST | /api/recipients | Yes | Add recipient |
@@ -530,7 +541,7 @@ All protected routes require the header `Authorization: Bearer <token>`.
 ## Dispatch Channels
 
 | Channel | Integration | Status |
-| ------- | ----------- | ------ |
+| ------- | ------- | ------- |
 | SMS | Twilio API - batches of 10 with 500ms pause, language-aware per recipient | Live |
 | Twitter/X | X API v2 - posts urgency-tagged tweet | Live |
 | Radio | Logged to audit system, real integration configurable | Simulated |
@@ -552,7 +563,7 @@ The values `all`, `all zones`, `all india`, and `general` broadcast to all recip
 ## Security
 
 | Layer | Mechanism |
-| ----- | --------- |
+| ------- | ------- |
 | Transport | HTTPS enforced with HTTP Strict Transport Security via Helmet |
 | Headers | Content Security Policy, X-Frame-Options, X-Content-Type-Options |
 | Auth | JWT with unique JTI per token, revoked on logout via token_blocklist table |
@@ -598,7 +609,7 @@ Set all required environment variables in your hosting platform's dashboard.
 UACS includes 18 pre-configured evacuation assembly points across India.
 
 | City | Site Name | Capacity | Type |
-| ---- | --------- | -------- | ---- |
+| ------- | ------- | ------- | ------- |
 | Mumbai | Mumbai Central Hub | 5,000 | State Command Center |
 | Delhi | Delhi Safe Zone 1 | 8,000 | National Shelter |
 | Bangalore | Bangalore Safety Hub | 4,500 | Tech-Response Center |

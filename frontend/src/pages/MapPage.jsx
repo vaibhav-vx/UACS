@@ -141,6 +141,7 @@ export default function MapPage() {
   const [volcanoes, setVolcanoes] = useState([]);
   const [ndmaAlerts, setNdmaAlerts] = useState([]);
   const [userAqi, setUserAqi] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
 
   // Selected Zone view focus
   const [selectedZone, setSelectedZone] = useState(null);
@@ -290,7 +291,7 @@ export default function MapPage() {
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: MAP_STYLES[currentBaseStyle].style,
+      style: MAP_STYLES.dark.style,
       center: [78.9629, 20.5937], // Center of India
       zoom: 4.8,
       pitch: 35, // Premium tilt perspective
@@ -300,16 +301,28 @@ export default function MapPage() {
     map.addControl(new maplibregl.NavigationControl(), 'top-left');
     mapRef.current = map;
 
+    map.on('load', () => {
+      setMapReady(true);
+    });
+
     return () => {
       map.remove();
       mapRef.current = null;
+      setMapReady(false);
     };
-  }, [currentBaseStyle]);
+  }, []); // Run once on mount
+
+  // ── Dynamically Swap Base Style ────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    map.setStyle(MAP_STYLES[currentBaseStyle].style);
+  }, [currentBaseStyle, mapReady]);
 
   // ── Render Markers and Layers ──────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !mapReady) return;
 
     // Clear old markers
     markersRef.current.forEach(m => m.remove());
@@ -455,7 +468,7 @@ export default function MapPage() {
           `<div class="p-1">
             <div class="font-black text-red-500 text-xs tracking-wider uppercase mb-1">🔥 NASA FIRMS WILDFIRE</div>
             <div class="text-slate-300 mt-1">Satellite: ${h.satellite || 'VIIRS'}</div>
-            {h.frp && <div class="text-orange-400 font-bold mt-1">Radiative power: ${h.frp} MW</div>}
+            <div class="text-orange-400 font-bold mt-1">Radiative power: ${h.frp} MW</div>
             <div class="text-slate-400 mt-1 text-[10px]">Date: ${h.acqDate} · Confidence: ${h.confidence}</div>
           </div>`
         );
@@ -558,7 +571,7 @@ export default function MapPage() {
       markersRef.current.push(marker);
     }
   }, [
-    layers, filterAlerts, filterEarthquakes, filterNasaEvents,
+    mapReady, layers, filterAlerts, filterEarthquakes, filterNasaEvents,
     emscQuakes, gdacsEvents, cyclones, wildfires, floods, volcanoes, ndmaAlerts, userAqi
   ]);
 

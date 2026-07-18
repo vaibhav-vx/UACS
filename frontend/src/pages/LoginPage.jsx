@@ -236,35 +236,7 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center p-4 bg-theme-base overflow-hidden">
       
-      {/* ── Figma style flow path design background ── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-25 dark:opacity-40 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--bg-base)_80%)] z-10" />
-        <svg className="w-full h-full min-w-[1440px] opacity-70" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="flow-line-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.8" />
-              <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="var(--border)" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="flow-line-grad-2" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="var(--border)" stopOpacity="0.1" />
-              <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.8" />
-            </linearGradient>
-          </defs>
 
-          {/* Flows */}
-          <path d="M -100 200 C 300 80, 500 580, 900 280 C 1100 180, 1300 480, 1600 220" stroke="url(#flow-line-grad-1)" strokeWidth="3" strokeDasharray="15, 30" className="animate-flow-line" />
-          <path d="M -100 480 C 400 680, 700 180, 1000 520 C 1200 620, 1400 320, 1600 420" stroke="url(#flow-line-grad-2)" strokeWidth="2.5" strokeDasharray="20, 40" className="animate-flow-line-reverse" />
-          <path d="M -100 80 C 200 280, 600 80, 800 420 C 1000 620, 1300 120, 1600 320" stroke="url(#flow-line-grad-1)" strokeWidth="1.5" strokeDasharray="10, 20" className="animate-flow-line-fast" />
-
-          {/* Tactical Background Grid Lines */}
-          <line x1="-100" y1="150" x2="1600" y2="150" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />
-          <line x1="-100" y1="350" x2="1600" y2="350" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />
-          <line x1="-100" y1="550" x2="1600" y2="550" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="5, 15" strokeOpacity="0.4" />
-          <path d="M 150 0 L 150 800 M 350 0 L 350 800 M 550 0 L 550 800 M 750 0 L 750 800 M 950 0 L 950 800 M 1150 0 L 1150 800 M 1350 0 L 1350 800" stroke="var(--border)" strokeWidth="0.5" strokeOpacity="0.2" />
-        </svg>
-      </div>
 
       {/* Top-right: language + theme selector */}
       <div className="absolute top-5 right-5 flex items-center gap-2.5 z-50">

@@ -89,6 +89,83 @@
   --scrollbar-thumb-hover: #94a3b8;
 }
 
+/* Amber Operations Theme (Desert/Tacti-cool) */
+.amber-ops {
+  --bg-base: #17110c;
+  --bg-surface: #241a12;
+  --bg-card: #241a12;
+  --bg-card-solid: #241a12;
+  --bg-hover: #36281b;
+  --bg-input: #36281b;
+  --bg-selected: rgba(249, 115, 22, 0.1);
+
+  --text-primary: #fcf8f5;
+  --text-secondary: #c2b5aa;
+  --text-muted: #8c7d71;
+  --text-dim: #605348;
+  --text-inverse: #17110c;
+
+  --border: #36281b;
+  --border-hover: #4a3827;
+  --border-strong: #4a3827;
+
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-dark: #c2410c;
+  --accent-bg: rgba(249, 115, 22, 0.12);
+  --accent-border: rgba(249, 115, 22, 0.35);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
+  --card-blur: none;
+  --card-shadow: none;
+
+  --scrollbar-track: #17110c;
+  --scrollbar-thumb: #36281b;
+  --scrollbar-thumb-hover: #4a3827;
+}
+
+/* Nordic Frost Theme (Cyber Blue / Antarctic Polar) */
+.nordic-frost {
+  --bg-base: #0a0e17;
+  --bg-surface: #101626;
+  --bg-card: #101626;
+  --bg-card-solid: #101626;
+  --bg-hover: #1b263e;
+  --bg-input: #1b263e;
+  --bg-selected: rgba(6, 182, 212, 0.1);
+
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+  --text-inverse: #0a0e17;
+
+  --border: #1b263e;
+  --border-hover: #27375a;
+  --border-strong: #27375a;
+
+  --accent: #06b6d4;
+  --accent-hover: #0891b2;
+  --accent-dark: #0e7490;
+  --accent-bg: rgba(6, 182, 212, 0.12);
+  --accent-border: rgba(6, 182, 212, 0.35);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
+  --card-blur: none;
+  --card-shadow: none;
+
+  --scrollbar-track: #0a0e17;
+  --scrollbar-thumb: #1b263e;
+  --scrollbar-thumb-hover: #27375a;
+}
+
+
 /* ═══════════════════════════════════════════════════════ */
 /* Smooth theme transition                                 */
 /* ═══════════════════════════════════════════════════════ */

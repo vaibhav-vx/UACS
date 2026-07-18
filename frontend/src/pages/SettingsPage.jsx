@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function SettingsPage() {
   const { language, setLanguage, LANGUAGES } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, setTheme } = useTheme();
   const { user: authUser, fetchUser } = useAuth();
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('uacs_user') || '{}'));
   
@@ -146,15 +146,22 @@ export default function SettingsPage() {
                        {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
                     </select>
                  </div>
-                 <div className="flex items-center justify-between">
-                    <div>
-                       <h4 className="text-sm font-bold">Theme Mode</h4>
-                       <p className="text-xs text-theme-muted">Switch between light and dark interface.</p>
-                    </div>
-                    <button onClick={toggleTheme} className="p-2 rounded-xl bg-theme-hover border border-theme-border">
-                       {theme === 'dark' ? <Sun className="w-5 h-5 text-orange-500" /> : <Moon className="w-5 h-5 text-blue-500" />}
-                    </button>
-                 </div>
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <h4 className="text-sm font-bold">UACS Theme Skin</h4>
+                        <p className="text-xs text-theme-muted">Personalize your emergency response command center.</p>
+                     </div>
+                     <select
+                       value={theme}
+                       onChange={(e) => setTheme(e.target.value)}
+                       className="px-4 py-2 bg-theme-hover border border-theme-border rounded-xl text-sm font-bold outline-none cursor-pointer"
+                     >
+                       <option value="dark">🕶️ Dark Command (Default)</option>
+                       <option value="light">☀️ Voyager Light (Standard)</option>
+                       <option value="amber-ops">🏜️ Amber Operations (Desert)</option>
+                       <option value="nordic-frost">🥶 Nordic Frost (Cyber Blue)</option>
+                     </select>
+                  </div>
               </div>
            </section>
 

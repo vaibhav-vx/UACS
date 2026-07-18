@@ -169,7 +169,7 @@ Everything is logged, auditable, and designed to operate under crisis conditions
 | react-router-dom | 6.x | Client-side routing |
 | axios | 1.x | API requests with interceptors |
 | react-hot-toast | 2.x | Notification toasts |
-| leaflet / react-leaflet | 4.x | Interactive maps |
+| maplibre-gl | 5.x | Interactive WebGL vector maps |
 | lucide-react | 0.x | Icon library |
 | tailwindcss | 3.x | Utility-first CSS with custom variables |
 
@@ -250,8 +250,7 @@ uacs-project/
         │   ├── ChannelPreviews.jsx     Simulated per-channel message previews
         │   ├── ExpiryTimer.jsx         Countdown timer - green to yellow to red
         │   ├── LanguageCard.jsx        Translated message card per language
-        │   ├── MapZonePicker.jsx       Leaflet map for zone selection and geocoding
-        │   ├── ShockwaveCircle.jsx     Earthquake pulse ring animation
+        │   ├── MapZonePicker.jsx       MapLibre GL map for zone selection and geocoding
         │   ├── SituationMapCard.jsx    Full live map - USGS, NASA, EAPs
         │   └── UserNotificationBar.jsx Alert bar and I'm Safe or SOS for users
         └── pages/
